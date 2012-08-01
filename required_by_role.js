@@ -3,7 +3,7 @@
  * Custom behavior for the module required_by_role
  * States api does not solve the problem.
  */
-Drupal.behaviors.requiredByRole= {
+Drupal.behaviors.requiredByRole = {
   attach: function (context, settings) {
 
     jQuery(':input[name="instance[required]"]').change(function(){

@@ -2,7 +2,6 @@
 
 /**
  * Implements hook_field_info_alter().
- *
  */
 function required_by_role_field_info_alter(&$info) {
   foreach ($info as $field_type => $field_type_info) {
@@ -13,19 +12,18 @@ function required_by_role_field_info_alter(&$info) {
 }
 
 /**
- * Implements hook_field_widget_form_alter.
- *
+ * Implements hook_field_widget_form_alter().
  */
 function required_by_role_field_widget_form_alter(&$element, &$form_state, $context) {
 
-  if(!$context['instance']['required']) {
+  if (!$context['instance']['required']) {
 
     global $user;
 
     $settings = $context['instance']['settings'];
     $required_by_role = $settings['required_by_role'] ? $settings['required_by_role'] : array();
 
-    $match = array_intersect(array_keys($user->roles) , $required_by_role);
+    $match = array_intersect(array_keys($user->roles), $required_by_role);
 
     $element['value']['#required'] = $element['#required'] = !empty($match);
 
@@ -34,7 +32,6 @@ function required_by_role_field_widget_form_alter(&$element, &$form_state, $cont
 
 /**
  * Implements hook_form_FORM_ID_alter().
- *
  */
 function required_by_role_form_field_ui_field_edit_form_alter(&$form, $form_state) {
   $field_name = $form['#field']['field_name'];
@@ -49,13 +46,10 @@ function required_by_role_form_field_ui_field_edit_form_alter(&$form, $form_stat
 
   $module_path = drupal_get_path('module', 'required_by_role');
 
-  /**
-   * Js add, needed because STATES API behaves unproperly in this context hidding required option.
-   */
-
-  $attached =array(
+  //Js add, needed because STATES API behaves unproperly in this context hidding required option.
+  $attached = array(
     'js' => array(
-      $module_path . '/required_by_role.js'
+      $module_path . '/required_by_role.js',
     ),
   );
 
@@ -70,9 +64,7 @@ function required_by_role_form_field_ui_field_edit_form_alter(&$form, $form_stat
     '#description' => $description,
   );
 
-  /**
-   * Default value needs allways to be NOT required
-   */
+  //Default value needs allways to be NOT required
   $form['instance']['default_value_widget'][$field_name][LANGUAGE_NONE][0]['#required'] = FALSE;
 
 }
