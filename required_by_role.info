@@ -1,0 +1,3 @@
+name = Mandatory per role
+description = Provides each field may choose required property per role
+core = 7.x
