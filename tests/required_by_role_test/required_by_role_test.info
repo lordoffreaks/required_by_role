@@ -1,0 +1,17 @@
+name = Required by role test
+description = Module for testing purposes
+
+hidden = TRUE
+
+core = 7.x
+dependencies[] = date
+dependencies[] = date_popup
+dependencies[] = email
+dependencies[] = image
+dependencies[] = required_by_role
+
+;Tests
+files[] = RequiredByRoleBasic.test
+files[] = RequiredByRoleDateFieldWebTestCase.test
+files[] = RequiredByRoleEmailFieldWebTestCase.test
+files[] = RequiredByRoleImageFieldWebTestCase.test

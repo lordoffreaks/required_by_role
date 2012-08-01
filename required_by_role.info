@@ -1,3 +1,11 @@
-name = Mandatory per role
-description = Provides each field may choose required property per role
+name = Required by role
+description = Provides checkboxes for each field to set the required property for that field per role.
 core = 7.x
+
+dependencies[] = ctools
+
+files[] = required_by_role.date.inc
+
+; Base required class.
+files[] = RequiredPlugin.php
+files[] = RequiredInterface.php

@@ -1,78 +1,300 @@
 <?php
 
 /**
+ * @file
+ * Allows certain user roles to be exempt from required fields
+ */
+
+module_load_include('inc', 'required_by_role', 'required_by_role.date');
+
+/**
+ * Implements hook_help().
+ */
+function required_by_role_help($path, $arg) {
+  switch ($path) {
+
+    case 'admin/help#required_by_role':
+      $output = '';
+      $output .= '<p>' . t('The Required by role module provides an easy and flexible way for developers and site builders to determine whether a field (instance) should be <em>required</em> by all users or just for selected user roles.') . '</p>';
+      return $output;
+  }
+}
+
+/**
  * Implements hook_field_info_alter().
- *
  */
 function required_by_role_field_info_alter(&$info) {
+
   foreach ($info as $field_type => $field_type_info) {
     $info[$field_type]['instance_settings'] += array(
-      'required_by_role' => array(),
+      'required_plugin' => array(),
+      'required_plugin_options' => array(),
     );
   }
 }
 
 /**
- * Implements hook_field_widget_form_alter.
- *
+ * Implements hook_field_widget_form_alter().
  */
 function required_by_role_field_widget_form_alter(&$element, &$form_state, $context) {
 
-  if(!$context['instance']['required']) {
+  if (!$context['instance']['required']) {
 
     global $user;
 
+    $account = $user;
     $settings = $context['instance']['settings'];
-    $required_by_role = $settings['required_by_role'] ? $settings['required_by_role'] : array();
+    $field = $context['field'];
 
-    $match = array_intersect(array_keys($user->roles) , $required_by_role);
+    // Getting the value based on our rules.
+    $is_required = required_by_role_is_required($element, $account, $context);
 
-    $element['value']['#required'] = $element['#required'] = !empty($match);
+    // Recreating the whole element.
+    // We need to do that because the hook_field_widget_form_alter acts late in
+    // field_default_form and the element is already created, so the property
+    // is not propagated.
+    _required_by_role_recreate_element($element, $form_state, $context, $is_required);
+
+    // Give the opportunity to other modules to act on this property.
+    drupal_alter('required_property', $element, $field, $is_required);
 
   }
 }
 
 /**
- * Implements hook_form_FORM_ID_alter().
+ * Helper function to recreate the element.
  *
+ * Mostly copied from field_default_form in field.form.inc file.
+ */
+function _required_by_role_recreate_element(&$element, &$form_state, $context, $is_required) {
+
+  $get_delta = $context['delta'];
+
+  $is_required = $is_required !== NULL ? $is_required : $instance['required'];
+
+  $field_name = $context['field']['field_name'];
+  $instance = $context['instance'];
+  $field = $context['field'];
+  $langcode = $context['langcode'];
+  $items = $context['items'];
+  $form = $context['form'];
+  $entity = isset($context['form']['#entity']) ? $context['form']['#entity'] : NULL;
+  $parents = $context['form']['#parents'];
+
+  // Important to set here to be inherited by the children.
+  $instance['required'] = $is_required;
+
+  // If field module handles multiple values for this form element, and we are
+  // displaying an individual element, process the multiple value form.
+  if (!isset($get_delta) && field_behaviors_widget('multiple values', $instance) == FIELD_BEHAVIOR_DEFAULT) {
+    // Store the entity in the form.
+    $form['#entity'] = $entity;
+    $elements = field_multiple_value_form($field, $instance, $langcode, $items, $form, $form_state);
+  }
+  // If the widget is handling multiple values (e.g Options), or if we are
+  // displaying an individual element, just get a single form element and make
+  // it the $delta value.
+  else {
+    $delta = isset($get_delta) ? $get_delta : 0;
+    $function = $instance['widget']['module'] . '_field_widget_form';
+    if (function_exists($function)) {
+      $element = array(
+        '#entity' => $entity,
+        '#entity_type' => $instance['entity_type'],
+        '#bundle' => $instance['bundle'],
+        '#field_name' => $field_name,
+        '#language' => $langcode,
+        '#field_parents' => $parents,
+        '#columns' => array_keys($field['columns']),
+        '#title' => check_plain($instance['label']),
+        '#description' => field_filter_xss($instance['description']),
+        // Only the first widget should be required.
+        '#required' => $delta == 0 && $is_required,
+        '#delta' => $delta,
+      );
+
+      $element = $function($form, $form_state, $field, $instance, $langcode, $items, $delta, $element);
+
+    }
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
  */
 function required_by_role_form_field_ui_field_edit_form_alter(&$form, $form_state) {
+
+  global $user;
+
   $field_name = $form['#field']['field_name'];
-  $field = field_info_field($field_name);
-  $required_by_role = $form['#instance']['settings']['required_by_role'];
-  $label = t('Required per role');
-  $title = t('Mandatory per role');
-  $description = t('Select one of these options if you want different behavior between roles, elsewhere choose use REQUIRED option.');
 
-  $options = user_roles();
-  unset($options[DRUPAL_AUTHENTICATED_RID]);
+  $form['instance']['required']['#access'] = FALSE;
 
-  $module_path = drupal_get_path('module', 'required_by_role');
+  // Default value needs always to be NOT required.
+  $default_value_widget = &$form['instance']['default_value_widget'][$field_name][LANGUAGE_NONE];
 
-  /**
-   * Js add, needed because STATES API behaves unproperly in this context hidding required option.
-   */
+  if (isset($default_value_widget[0]['#required'])) {
+    $default_value_widget[0]['#required'] = FALSE;
+  }
+  else {
+    $default_value_widget['#required'] = FALSE;
+  }
 
-  $attached =array(
-    'js' => array(
-      $module_path . '/required_by_role.js'
+  // Ctools plugin.
+  $settings = $form['#instance']['settings'];
+  $required_plugin = $settings['required_plugin'];
+  $required_plugin_options = $settings['required_plugin_options'];
+
+  if (!empty($form_state['values']['instance']['settings']['required_plugin'])) {
+    $plugin_id = $form_state['values']['instance']['settings']['required_plugin'];
+  }
+  else {
+    $plugin_id = $form['#instance']['settings']['required_plugin'] ? $form['#instance']['settings']['required_plugin'] : 'core';
+  }
+
+  // If have changed the plugin make sure that we empty the options.
+  if ($plugin_id != $required_plugin) {
+    $required_plugin_options = array();
+  }
+
+  // Load all plugins type "required".
+  ctools_include('plugins');
+  $plugins = ctools_get_plugins('required_by_role', 'required');
+  $plugins_options = array();
+
+  foreach ($plugins as $id => $p) {
+    $plugins_options[$id] = $p['label'];
+  }
+
+  if (empty($plugins_options)) {
+    $form['message'] = array(
+      '#markup' => t('Sorry no operation plugins available in the system.'),
+    );
+  }
+
+  $form['instance']['settings']['required_plugin'] = array(
+    '#type' => 'radios',
+    '#title' => t('Please choose the required strategy.'),
+    '#options' => $plugins_options,
+    '#default_value' => $plugin_id,
+    '#weight' => $form['instance']['required']['#weight'] - 1,
+    '#ajax' => array(
+      'callback' => 'require_by_role_element_ajax_callback',
+      'wrapper' => 'required-ajax-wrapper',
+      'effect' => 'fade',
+      'speed' => 'fast',
+    ),
+    '#parents' => array('instance', 'settings', 'required_plugin'),
+  );
+
+  $plugin = _required_by_role_get_instance($plugin_id, $user, array());
+
+  $form['instance']['settings']['required_plugin_options'] = $plugin->form($required_plugin_options);
+  $form['instance']['settings']['required_plugin_options']['#weight'] = $form['instance']['settings']['required_plugin']['#weight'] + 1;
+
+}
+
+/**
+ * Renders the form element to select the required property.
+ *
+ * @return array
+ *   The rendered element.
+ */
+function require_by_role_element_ajax_callback($form, $form_state) {
+  return $form['instance']['settings']['required_plugin_options'];
+}
+
+/**
+ * Central method to figure out if the fields should be required or not based on the current callback.
+ */
+function required_by_role_is_required($element, $account, $context) {
+
+  if (!isset($context['instance'])) {
+    $context['instance'] = $element['#instance'];
+  }
+
+  $settings = !empty($context['instance']['settings']) ? $context['instance']['settings'] : array();
+  $plugin_id = !empty($settings['required_plugin']) ? $settings['required_plugin'] : 'core';
+
+  $context['element'] = $element;
+
+  $plugin = _required_by_role_get_instance($plugin_id, $account, $context);
+
+  $is_required = $plugin->isRequired();
+
+  return $is_required;
+}
+
+/**
+ * Implements hook_required_property_alter.
+ *
+ * Currently adds support for standard fields, image, and email.
+ */
+function required_by_role_required_property_alter(&$element, $field, $is_required) {
+
+  $type = $field['type'];
+
+  switch ($type) {
+    case 'image':
+    case 'fivestar':
+      $element[0]['#required'] = $is_required;
+      break;
+
+    case 'email':
+      $element['email']['#required'] = $is_required;
+      break;
+
+    default:
+      $element['value']['#required'] = $is_required;
+      break;
+  }
+
+  return $element;
+}
+
+/**
+ * Implements hook_ctools_plugin_type().
+ */
+function required_by_role_ctools_plugin_type() {
+  return array(
+    'required' => array(
+      'use hooks' => FALSE,
     ),
   );
+}
 
-  $form['instance']['settings']['required_by_role'] = array(
-    '#prefix' => '<label>' . $label . '</label>',
-    '#type' => 'checkboxes',
-    '#options' => $options,
-    '#default_value' => $required_by_role,
-    '#weight' => $form['instance']['required']['#weight'] + 1,
-    '#disabled' => $form['instance']['required']['#default_value'],
-    '#attached' => $attached,
-    '#description' => $description,
-  );
+/**
+ * Helper function to get an instance of the handler class.
+ */
+function _required_by_role_get_instance($id, $account, $context) {
 
-  /**
-   * Default value needs allways to be NOT required
-   */
-  $form['instance']['default_value_widget'][$field_name][LANGUAGE_NONE][0]['#required'] = FALSE;
+  $instances = &drupal_static(__FUNCTION__);
 
+  if (!isset($instances[$id])) {
+
+    ctools_include('plugins');
+
+    $plugin = ctools_get_plugins('required_by_role', 'required', $id);
+    $class = ctools_plugin_get_class($plugin, 'handler');
+
+    $instances[$id] = new $class();
+    $instances[$id]->setContexts($account, $context);
+
+  }
+
+  // Check that plugin class has inherited proper 'RequiredPlugin' class.
+  if (!$instances[$id] instanceof RequiredPlugin) {
+    $instances[$id] = NULL;
+  }
+
+  return $instances[$id];
+}
+
+/**
+ * Implements hook_ctools_plugin_directory().
+ */
+function required_by_role_ctools_plugin_directory($module, $plugin) {
+  if (($module == 'required_by_role') && ($plugin == 'required')) {
+    return 'plugins/required';
+  }
 }
