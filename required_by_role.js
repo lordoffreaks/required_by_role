@@ -1,6 +1,6 @@
 (function($) {
 /**
- * Custom behavior for the module mandatory pero role
+ * Custom behavior for the module required_by_role
  * States api does not solve the problem.
  */
 Drupal.behaviors.requiredByRole= {
