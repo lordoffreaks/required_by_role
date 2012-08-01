@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * Allows certain user roles to be exempt from required fields
+ */
+
+/**
  * Implements hook_field_info_alter().
  */
 function required_by_role_field_info_alter(&$info) {
@@ -46,7 +51,8 @@ function required_by_role_form_field_ui_field_edit_form_alter(&$form, $form_stat
 
   $module_path = drupal_get_path('module', 'required_by_role');
 
-  //Js add, needed because STATES API behaves unproperly in this context hidding required option.
+  // Js add, needed because STATES API behaves unproperly
+  // in this context hidding required option.
   $attached = array(
     'js' => array(
       $module_path . '/required_by_role.js',
@@ -64,7 +70,7 @@ function required_by_role_form_field_ui_field_edit_form_alter(&$form, $form_stat
     '#description' => $description,
   );
 
-  //Default value needs allways to be NOT required
+  // Default value needs allways to be NOT required.
   $form['instance']['default_value_widget'][$field_name][LANGUAGE_NONE][0]['#required'] = FALSE;
 
 }
