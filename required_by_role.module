@@ -6,6 +6,20 @@
  */
 
 /**
+ * Implements hook_help().
+ */
+function required_by_role_help($path, $arg) {
+  switch ($path) {
+
+    case 'admin/help#required_by_role':
+      $output = '';
+      $output .= '<p>' . t('The required by role module provides a easy and flexible way for develepers and site builders for determine if a field (instance) should be <em>required</em> by all users or just for selected user roles.') . '</p>';
+      return $output;
+  }
+}
+
+
+/**
  * Implements hook_field_info_alter().
  */
 function required_by_role_field_info_alter(&$info) {
@@ -40,13 +54,22 @@ function required_by_role_field_widget_form_alter(&$element, &$form_state, $cont
  */
 function required_by_role_form_field_ui_field_edit_form_alter(&$form, $form_state) {
   $field_name = $form['#field']['field_name'];
-  $field = field_info_field($field_name);
   $required_by_role = $form['#instance']['settings']['required_by_role'];
   $label = t('Required by role');
-  $description = t('Select one of these options if you want different behavior between roles, elsewhere choose use REQUIRED option.');
+  $description = t('Select this if you want this field will be required for ALL ROLES, otherwise choose specific roles in the checkboxes below under %name' , array('%name' => 'Required by role'));
 
-  $options = user_roles();
-  unset($options[DRUPAL_AUTHENTICATED_RID]);
+  $roles = user_roles();
+  unset($roles[DRUPAL_AUTHENTICATED_RID]);
+
+  $header = array(
+    'name' => t('Role'),
+  );
+
+  foreach($roles as $rid => $role){
+    $options[$rid] = array(
+      'name' => $role,
+    );
+  }
 
   $module_path = drupal_get_path('module', 'required_by_role');
 
@@ -60,14 +83,20 @@ function required_by_role_form_field_ui_field_edit_form_alter(&$form, $form_stat
 
   $form['instance']['settings']['required_by_role'] = array(
     '#prefix' => '<label>' . $label . '</label>',
-    '#type' => 'checkboxes',
+    '#type' => 'tableselect',
+    '#header' => $header,
     '#options' => $options,
     '#default_value' => $required_by_role,
     '#weight' => $form['instance']['required']['#weight'] + 1,
     '#disabled' => $form['instance']['required']['#default_value'],
     '#attached' => $attached,
-    '#description' => $description,
+    '#empty' => t('No roles available.'),
+    '#attributes' => array(
+      'id' => array('tableselect-required-by-role'),
+    ),
   );
+
+  $form['instance']['required']['#description'] = $description;
 
   // Default value needs allways to be NOT required.
   $form['instance']['default_value_widget'][$field_name][LANGUAGE_NONE][0]['#required'] = FALSE;

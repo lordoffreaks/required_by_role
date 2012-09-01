@@ -8,10 +8,10 @@ Drupal.behaviors.requiredByRole = {
 
     jQuery(':input[name="instance[required]"]').change(function(){
       if(jQuery(this).is(':checked')){
-        jQuery('#edit-instance-settings-required-by-role :checkbox').attr('disabled', 'disabled');
+        jQuery('#tableselect-required-by-role').find(':checkbox').attr('disabled', 'disabled');
       }
       else {
-       jQuery('#edit-instance-settings-required-by-role :checkbox').removeAttr('disabled');
+       jQuery('#tableselect-required-by-role').find(':checkbox').removeAttr('disabled');
       }
     })
 
