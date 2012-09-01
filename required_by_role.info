@@ -1,3 +1,5 @@
 name = Required by role
 description = Provides each field may choose required property per role
 core = 7.x
+
+files[] = required_by_role.test
