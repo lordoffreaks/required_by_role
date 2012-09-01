@@ -42,8 +42,7 @@ function required_by_role_form_field_ui_field_edit_form_alter(&$form, $form_stat
   $field_name = $form['#field']['field_name'];
   $field = field_info_field($field_name);
   $required_by_role = $form['#instance']['settings']['required_by_role'];
-  $label = t('Required per role');
-  $title = t('Mandatory per role');
+  $label = t('Required by role');
   $description = t('Select one of these options if you want different behavior between roles, elsewhere choose use REQUIRED option.');
 
   $options = user_roles();
