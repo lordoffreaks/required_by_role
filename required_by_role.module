@@ -13,7 +13,7 @@ function required_by_role_help($path, $arg) {
 
     case 'admin/help#required_by_role':
       $output = '';
-      $output .= '<p>' . t('The required by role module provides a easy and flexible way for develepers and site builders for determine if a field (instance) should be <em>required</em> by all users or just for selected user roles.') . '</p>';
+      $output .= '<p>' . t('The Required by role module provides an easy and flexible way for developers and site builders to determine whether a field (instance) should be <em>required</em> by all users or just for selected user roles.') . '</p>';
       return $output;
   }
 }
@@ -46,10 +46,10 @@ function required_by_role_field_widget_form_alter(&$element, &$form_state, $cont
 }
 
 /**
- * Checks if at least one of $roles values are contained into $account->roles array
+ * Checks if at least one of $roles values are in the $account->roles array
  * @param  object   $account user account object
  * @param  array    $roles   array of roles in format array('rid' => 'name');
- * @return boolean  TRUE is $account->roles contains at least one of $roles values
+ * @return boolean  TRUE if $account->roles contains one or more $roles values
  */
 function _required_by_role_roles_intersect($account, $roles){
   $match = array_intersect(array_keys($account->roles), $roles);
@@ -63,7 +63,7 @@ function required_by_role_form_field_ui_field_edit_form_alter(&$form, $form_stat
   $field_name = $form['#field']['field_name'];
   $required_by_role = $form['#instance']['settings']['required_by_role'];
   $label = t('Required by role');
-  $description = t('Select this if you want this field will be required for ALL ROLES, otherwise choose specific roles in the checkboxes below under %name' , array('%name' => 'Required by role'));
+  $description = t('Select this if you want this field to be required for ALL ROLES, otherwise choose specific roles in the checkboxes, below, under %name' , array('%name' => 'Required by role'));
 
   $roles = user_roles();
   unset($roles[DRUPAL_AUTHENTICATED_RID]);
