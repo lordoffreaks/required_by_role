@@ -18,7 +18,6 @@ function required_by_role_help($path, $arg) {
   }
 }
 
-
 /**
  * Implements hook_field_info_alter().
  */
@@ -36,17 +35,25 @@ function required_by_role_field_info_alter(&$info) {
 function required_by_role_field_widget_form_alter(&$element, &$form_state, $context) {
 
   if (!$context['instance']['required']) {
-
     global $user;
 
+    $account = $user;
     $settings = $context['instance']['settings'];
-    $required_by_role = $settings['required_by_role'] ? $settings['required_by_role'] : array();
+    $roles = $settings['required_by_role'] ? $settings['required_by_role'] : array();
 
-    $match = array_intersect(array_keys($user->roles), $required_by_role);
-
-    $element['value']['#required'] = $element['#required'] = !empty($match);
-
+    $element['value']['#required'] = $element['#required'] = _required_by_role_roles_intersect($account, $roles);
   }
+}
+
+/**
+ * Checks if at least one of $roles values are contained into $account->roles array
+ * @param  object   $account user account object
+ * @param  array    $roles   array of roles in format array('rid' => 'name');
+ * @return boolean  TRUE is $account->roles contains at least one of $roles values
+ */
+function _required_by_role_roles_intersect($account, $roles){
+  $match = array_intersect(array_keys($account->roles), $roles);
+  return !empty($match);
 }
 
 /**
