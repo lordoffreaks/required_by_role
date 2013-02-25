@@ -22,6 +22,7 @@ function required_by_role_help($path, $arg) {
  * Implements hook_field_info_alter().
  */
 function required_by_role_field_info_alter(&$info) {
+
   foreach ($info as $field_type => $field_type_info) {
     $info[$field_type]['instance_settings'] += array(
       'required_by_role' => array(),
@@ -41,7 +42,21 @@ function required_by_role_field_widget_form_alter(&$element, &$form_state, $cont
     $settings = $context['instance']['settings'];
     $roles = $settings['required_by_role'] ? $settings['required_by_role'] : array();
 
-    $element['value']['#required'] = $element['#required'] = _required_by_role_roles_intersect($account, $roles);
+    $is_required = _required_by_role_roles_intersect($account, $roles);
+
+    $element['#required'] = $is_required;
+
+    if (!empty($element['value'])) {
+      $element['value']['#required'] = $element['#required'];
+    }
+
+    //Support for email field
+    // @TODO: figure out a better way for do it
+
+    if(isset($element['email']) && isset($element['email']['#required'])){
+      $element['email']['#required'] = $is_required;
+    }
+
   }
 }
 
@@ -60,6 +75,7 @@ function _required_by_role_roles_intersect($account, $roles){
  * Implements hook_form_FORM_ID_alter().
  */
 function required_by_role_form_field_ui_field_edit_form_alter(&$form, $form_state) {
+
   $field_name = $form['#field']['field_name'];
   $required_by_role = $form['#instance']['settings']['required_by_role'];
   $label = t('Required by role');
