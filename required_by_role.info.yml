@@ -1,0 +1,4 @@
+name: Required by role
+description: Provides checkboxes for each field to set the required property for that field per role.
+core: 8.x
+version: VERSION

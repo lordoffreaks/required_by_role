@@ -40,6 +40,7 @@ function required_by_role_field_widget_form_alter(&$element, &$form_state, $cont
 
     $account = $user;
     $settings = $context['instance']['settings'];
+
     $roles = $settings['required_by_role'] ? $settings['required_by_role'] : array();
 
     $is_required = _required_by_role_roles_intersect($account, $roles);
@@ -82,6 +83,7 @@ function required_by_role_form_field_ui_field_edit_form_alter(&$form, $form_stat
   $description = t('Select this if you want this field to be required for ALL ROLES, otherwise choose specific roles in the checkboxes, below, under %name' , array('%name' => 'Required by role'));
 
   $roles = user_roles();
+
   unset($roles[DRUPAL_AUTHENTICATED_RID]);
 
   $header = array(
@@ -90,7 +92,7 @@ function required_by_role_form_field_ui_field_edit_form_alter(&$form, $form_stat
 
   foreach($roles as $rid => $role){
     $options[$rid] = array(
-      'name' => $role,
+      'name' => $role->label(),
     );
   }
 
@@ -119,9 +121,11 @@ function required_by_role_form_field_ui_field_edit_form_alter(&$form, $form_stat
     ),
   );
 
+  $form['instance']['settings']['#weight'] = $form['instance']['required']['#weight'] + 1;
+
   $form['instance']['required']['#description'] = $description;
 
   // Default value needs allways to be NOT required.
-  $form['instance']['default_value_widget'][$field_name][LANGUAGE_NONE][0]['#required'] = FALSE;
+  $form['instance']['default_value_widget'][$field_name][LANGUAGE_NOT_SPECIFIED][0]['#required'] = FALSE;
 
 }
