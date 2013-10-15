@@ -1,0 +1,63 @@
+<?php
+
+/**
+ * @file
+ * Tests for Required by role module.
+ */
+
+/**
+ * Base class for all required by role web test cases.
+ */
+abstract class RequiredByRoleBasic extends DrupalWebTestCase {
+
+  protected $entity_type = 'node';
+  protected $entity_bundle = 'article';
+
+  protected $basePermissions = array();
+  protected $required_fields_rid = NULL;
+
+  protected function setUp() {
+
+    $this->basePermissions = array(
+      'access content',
+      'create ' . $this->entity_bundle . ' content',
+      'edit any ' . $this->entity_bundle . ' content',
+    );
+
+    $modules = array();
+    $modules[] = 'field';
+    $modules[] = 'field_ui';
+    $modules[] = 'required_by_role';
+
+    parent::setUp($modules);
+
+    if(!$this->required_fields_rid){
+    }
+
+    // Create Basic page and Article node types.
+    if ($this->profile != 'standard') {
+      $this->drupalCreateContentType(array('type' => $this->entity_bundle, 'name' => 'Article'));
+    }
+
+    module_load_include('inc', 'field', 'field.crud');
+    module_load_include('inc', 'node', 'node.pages');
+
+    // Create a role for required fields
+    $this->required_fields_rid = $this->drupalCreateRole($this->basePermissions);
+  }
+
+  protected function getRequiredUser(){
+
+    $account = $this->drupalCreateUser($this->basePermissions);
+
+    $edit = array();
+    $edit['roles'] = array($this->required_fields_rid => $this->required_fields_rid);
+    return user_save($account, $edit);
+
+  }
+
+  protected function getNonRequiredUser(){
+    return $this->drupalCreateUser($this->basePermissions);
+  }
+
+}

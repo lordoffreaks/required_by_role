@@ -1,0 +1,20 @@
+<?php
+
+/**
+ * Implements hook_required_by_role_callback_alter
+ * @param  [type] $callback [description]
+ * @return [type]           [description]
+ */
+function required_by_role_test_required_by_role_callback_alter($callback){
+  return 'required_by_role_test_required_callback';
+}
+
+/**
+ * Test callback for hook_required_by_role_callback_alter
+ * @param  [type] $account [description]
+ * @param  [type] $roles   [description]
+ * @return bool          [description]
+ */
+function required_by_role_test_required_callback($account, $roles){
+  return TRUE;
+}

@@ -1,0 +1,82 @@
+<?php
+/**
+ * @file
+ * Tests for the Image field.
+ */
+
+class RBRImageFieldWebTestCase extends RequiredByRoleBasic {
+
+  protected $field_name = 'field_image';
+
+  public static function getInfo() {
+    return array(
+      'name' => 'Required by role: Image',
+      'description' => 'Tests for image field.',
+      'group' => 'Required by role',
+    );
+  }
+
+  function setUp() {
+
+    parent::setUp('image');
+
+    $instance = field_info_instance('node', 'field_image', 'article');
+    $instance['settings']['required_by_role'] = array(
+      1 => 0,
+      3 => 0,
+      $this->required_fields_rid => $this->required_fields_rid,
+      5 => 0,
+    );
+
+    field_update_instance($instance);
+
+  }
+
+  function testImageFieldExists(){
+
+    $this->drupalLogin($this->getRequiredUser());
+
+    $this->drupalGet('node/add/' . $this->entity_type);
+    $name = 'files[' . $this->field_name . '_und_0]';
+    $this->assertFieldByName($name);
+
+    $this->drupalLogout();
+
+  }
+
+  /**
+   * Test for required role
+   * @return [type] [description]
+   */
+  function testIsRequiredRole(){
+
+    $edit = array();
+    $edit['title'] = $this->randomName(8);
+    $edit['body[und][0][value]'] = $this->randomName(16);
+
+    $this->drupalLogin($this->getRequiredUser());
+
+    $this->drupalPost('node/add/' . $this->entity_bundle, $edit, t('Save'));
+    $this->assertText('Image field is required.');
+
+    $this->drupalLogout();
+  }
+
+  /**
+   * Test for non-required role
+   * @return [type] [description]
+   */
+  function testIsNonRequiredRole(){
+
+    $edit = array();
+    $edit['title'] = $this->randomName(8);
+    $edit['body[und][0][value]'] = $this->randomName(16);
+
+    $this->drupalLogin($this->getNonRequiredUser());
+
+    $this->drupalPost('node/add/' . $this->entity_bundle, $edit, t('Save'));
+    $this->assertText($edit['title'], "Node has been created");
+
+    $this->drupalLogout();
+  }
+}

@@ -1,0 +1,128 @@
+<?php
+/**
+ * @file
+ * Tests for the Email field.
+ */
+
+class RequiredByRoleEmailFieldWebTestCase extends RequiredByRoleBasic {
+
+  protected $field_name = 'field_email';
+  protected $field_label = 'Email';
+
+  public static function getInfo() {
+    return array(
+      'name' => 'Required by role: Email',
+      'description' => 'Tests for email field.',
+      'group' => 'Required by role',
+    );
+  }
+
+  protected function setUp() {
+
+    parent::setUp('email');
+    $this->drupalLogin($this->required_fields_user);
+    $this->createEmailField();
+
+  }
+
+
+  function _testEmailFieldExists(){
+
+    $this->drupalGet('node/add/' . $this->entity_bundle);
+    $name = $this->field_name . '[und][0][email]';
+    $this->assertFieldByName($name);
+
+  }
+
+  public function testRequiredByRole(){
+
+    $edit = array();
+    $edit['title'] = $this->randomName(8);
+    $edit['body[und][0][value]'] = $this->randomName(16);
+
+    $this->drupalPost('node/add/' . $this->entity_bundle, $edit, t('Save'));
+    $this->assertText($this->field_label . ' field is required.');
+  }
+
+  protected function createEmailField($field_name = NULL, $label = NULL) {
+
+    $entity_type = $this->entity_type;
+    $bundle = $this->entity_bundle;
+
+    $field_name = $field_name ? $field_name : $this->field_name;
+    $label = $label ? $label : $this->field_label;
+
+    $field = field_info_field($field_name);
+    $instance = field_info_instance($field_name, $field_name, $bundle);
+
+    if (empty($field)) {
+      $field = array(
+        'field_name' => $field_name,
+        'type' => 'email',
+        'entity_types' => array($this->entity_type),
+        'active' => 1,
+        'cardinality' => 1,
+        'deleted' => 0,
+        'foreign keys' => array(),
+        'indexes' => array(),
+        'locked' => 0,
+        'module' => 'email',
+        'settings' => array(),
+        'translatable' => 0,
+      );
+      $field = field_create_field($field);
+    }
+    if (empty($instance)) {
+      $instance = array(
+        'field_name' => $field_name,
+        'description' => '',
+        'entity_type' => $this->entity_type,
+        'bundle' => $bundle,
+        'label' => $label,
+        'widget' => array(
+          'active' => 1,
+          'module' => 'email',
+          'settings' => array(
+            'size' => 60,
+          ),
+          'type' => 'email_textfield',
+          'weight' => 1,
+        ),
+        'settings' => array(
+          'required_by_role' => array(
+            1 => 0,
+            3 => 0,
+            $this->required_fields_rid => $this->required_fields_rid,
+            5 => 0,
+          ),
+          'user_register_form' => FALSE,
+        ),
+        'default_value' => NULL,
+        'deleted' => 0,
+        'required' => 0,
+        'display' => array(
+          'default' => array(
+            'label' => 'above',
+            'module' => 'email',
+            'settings' => array(),
+            'type' => 'email_default',
+            'weight' => 12,
+          ),
+          'teaser' => array(
+            'label' => 'above',
+            'settings' => array(),
+            'type' => 'hidden',
+            'weight' => 0,
+          ),
+        ),
+      );
+
+      $instance = field_create_instance($instance);
+    }
+
+    field_info_cache_clear(TRUE);
+    field_cache_clear(TRUE);
+
+    return $instance;
+  }
+}

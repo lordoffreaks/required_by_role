@@ -1,0 +1,5 @@
+name = Required by role test
+description = Module for testing purposes
+
+core = 7.x
+dependencies[] = required_by_role
