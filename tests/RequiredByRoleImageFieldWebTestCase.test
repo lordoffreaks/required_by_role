@@ -4,7 +4,7 @@
  * Tests for the Image field.
  */
 
-class RBRImageFieldWebTestCase extends RequiredByRoleBasic {
+class RequiredByRoleImageFieldWebTestCase extends RequiredByRoleBasic {
 
   protected $field_name = 'field_image';
 

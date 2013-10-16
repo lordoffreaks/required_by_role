@@ -2,6 +2,7 @@ name = Required by role
 description = Provides checkboxes for each field to set the required property for that field per role.
 core = 7.x
 
-files[] = tests/required_by_role.test
+files[] = tests/RequiredByRoleBasic.test
 files[] = tests/RequiredByRoleEmailFieldWebTestCase.test
-files[] = tests/RBRImageFieldWebTestCase.test
+files[] = tests/RequiredByRoleImageFieldWebTestCase.test
+files[] = tests/RequiredByRoleCallbackAlterTestCase.test

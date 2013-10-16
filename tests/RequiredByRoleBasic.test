@@ -22,6 +22,12 @@ abstract class RequiredByRoleBasic extends DrupalWebTestCase {
       'access content',
       'create ' . $this->entity_bundle . ' content',
       'edit any ' . $this->entity_bundle . ' content',
+      'administer content types',
+      'administer nodes',
+      'administer filters',
+      'access comments',
+      'post comments',
+      'access administration pages',
     );
 
     $modules = array();
@@ -30,9 +36,6 @@ abstract class RequiredByRoleBasic extends DrupalWebTestCase {
     $modules[] = 'required_by_role';
 
     parent::setUp($modules);
-
-    if(!$this->required_fields_rid){
-    }
 
     // Create Basic page and Article node types.
     if ($this->profile != 'standard') {
@@ -43,7 +46,7 @@ abstract class RequiredByRoleBasic extends DrupalWebTestCase {
     module_load_include('inc', 'node', 'node.pages');
 
     // Create a role for required fields
-    $this->required_fields_rid = $this->drupalCreateRole($this->basePermissions);
+    $this->required_fields_rid = $this->drupalCreateRole($this->basePermissions, 'Required fields role');
   }
 
   protected function getRequiredUser(){
@@ -52,6 +55,7 @@ abstract class RequiredByRoleBasic extends DrupalWebTestCase {
 
     $edit = array();
     $edit['roles'] = array($this->required_fields_rid => $this->required_fields_rid);
+
     return user_save($account, $edit);
 
   }

@@ -6,7 +6,6 @@
 
 class RequiredByRoleEmailFieldWebTestCase extends RequiredByRoleBasic {
 
-  protected $field_name = 'field_email';
   protected $field_label = 'Email';
 
   public static function getInfo() {
@@ -19,22 +18,26 @@ class RequiredByRoleEmailFieldWebTestCase extends RequiredByRoleBasic {
 
   protected function setUp() {
 
-    parent::setUp('email');
-    $this->drupalLogin($this->required_fields_user);
-    $this->createEmailField();
+    parent::setUp();
+    module_enable(array('email'));
+
+    $this->drupalLogin($this->getRequiredUser());
+
+    $rid = (int)$this->required_fields_rid;
+
+    $settings = array(
+      "instance[settings][required_by_role][$rid]" => $rid,
+    );
+
+    $this->createEmailField(NULL, $settings);
+
+    $this->drupalLogout();
 
   }
 
+  public function testRequiredRole(){
 
-  function _testEmailFieldExists(){
-
-    $this->drupalGet('node/add/' . $this->entity_bundle);
-    $name = $this->field_name . '[und][0][email]';
-    $this->assertFieldByName($name);
-
-  }
-
-  public function testRequiredByRole(){
+    $this->drupalLogin($this->getRequiredUser());
 
     $edit = array();
     $edit['title'] = $this->randomName(8);
@@ -42,87 +45,53 @@ class RequiredByRoleEmailFieldWebTestCase extends RequiredByRoleBasic {
 
     $this->drupalPost('node/add/' . $this->entity_bundle, $edit, t('Save'));
     $this->assertText($this->field_label . ' field is required.');
+
+    $this->drupalLogout();
   }
 
-  protected function createEmailField($field_name = NULL, $label = NULL) {
+  /**
+   * Test for non-required role
+   * @return [type] [description]
+   */
+  function testIsNonRequiredRole(){
 
-    $entity_type = $this->entity_type;
-    $bundle = $this->entity_bundle;
+    $edit = array();
+    $edit['title'] = $this->randomName(8);
+    $edit['body[und][0][value]'] = $this->randomName(16);
 
-    $field_name = $field_name ? $field_name : $this->field_name;
-    $label = $label ? $label : $this->field_label;
+    $this->drupalLogin($this->getNonRequiredUser());
 
-    $field = field_info_field($field_name);
-    $instance = field_info_instance($field_name, $field_name, $bundle);
+    $this->drupalPost('node/add/' . $this->entity_bundle, $edit, t('Save'));
+    $this->assertText($edit['title'], "Node has been created");
 
-    if (empty($field)) {
-      $field = array(
-        'field_name' => $field_name,
-        'type' => 'email',
-        'entity_types' => array($this->entity_type),
-        'active' => 1,
-        'cardinality' => 1,
-        'deleted' => 0,
-        'foreign keys' => array(),
-        'indexes' => array(),
-        'locked' => 0,
-        'module' => 'email',
-        'settings' => array(),
-        'translatable' => 0,
-      );
-      $field = field_create_field($field);
-    }
-    if (empty($instance)) {
-      $instance = array(
-        'field_name' => $field_name,
-        'description' => '',
-        'entity_type' => $this->entity_type,
-        'bundle' => $bundle,
-        'label' => $label,
-        'widget' => array(
-          'active' => 1,
-          'module' => 'email',
-          'settings' => array(
-            'size' => 60,
-          ),
-          'type' => 'email_textfield',
-          'weight' => 1,
-        ),
-        'settings' => array(
-          'required_by_role' => array(
-            1 => 0,
-            3 => 0,
-            $this->required_fields_rid => $this->required_fields_rid,
-            5 => 0,
-          ),
-          'user_register_form' => FALSE,
-        ),
-        'default_value' => NULL,
-        'deleted' => 0,
-        'required' => 0,
-        'display' => array(
-          'default' => array(
-            'label' => 'above',
-            'module' => 'email',
-            'settings' => array(),
-            'type' => 'email_default',
-            'weight' => 12,
-          ),
-          'teaser' => array(
-            'label' => 'above',
-            'settings' => array(),
-            'type' => 'hidden',
-            'weight' => 0,
-          ),
-        ),
-      );
+    $this->drupalLogout();
+  }
 
-      $instance = field_create_instance($instance);
-    }
+  protected function createEmailField($bundle = NULL, $settings = array()) {
 
-    field_info_cache_clear(TRUE);
-    field_cache_clear(TRUE);
+    $node_type = $bundle ? $bundle : $this->entity_bundle;
 
-    return $instance;
+    $name = 'email_test_' . strtolower($this->randomName(4));
+    $label = $this->field_label;
+
+    $edit = array(
+      'fields[_add_new_field][label]' => $label,
+      'fields[_add_new_field][field_name]' => $name,
+      'fields[_add_new_field][type]' => 'email',
+      'fields[_add_new_field][widget_type]' => 'email_textfield',
+    );
+
+    $field_name = 'field_'. $name;
+
+    $this->drupalPost('admin/structure/types/manage/'. $node_type .'/fields', $edit, t('Save'));
+    $this->drupalPost(NULL, array(), t('Save field settings'));
+    $this->drupalPost(NULL, $settings, t('Save settings'));
+
+    // Is field created?
+    $this->assertRaw(t('Saved %label configuration', array('%label' => $label)), 'Field added');
+    node_types_rebuild();
+    menu_rebuild();
+
+    return $field_name;
   }
 }
