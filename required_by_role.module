@@ -50,7 +50,7 @@ function required_by_role_field_widget_form_alter(&$element, &$form_state, $cont
     $required_callback = _required_by_role_get_callback();
 
     if($required_callback && function_exists($required_callback)){
-      $is_required = $required_callback($account, $roles);
+      $is_required = $required_callback($account, $roles, $field);
     }
 
     $element['#required'] = $is_required;
@@ -101,8 +101,7 @@ function required_by_role_get_required_property_value($element, $field){
 /**
  * hook_required_property_alter implementation.
  *
- * Currently adds support for standard fields, image, and email. Pending to
- * add support for field_collection
+ * Currently adds support for standard fields, image, and email.
  *
  * @param  [type] $element [description]
  * @param  [type] $field   [description]
@@ -141,11 +140,15 @@ function required_by_role_required_by_role_callback(){
  *
  * @param  object   $account user account object
  * @param  array    $roles   array of roles in format array('rid' => 'name');
+ * @param  array    $field   The actual field.
  * @return boolean  TRUE if $account->roles contains one or more $roles values
  */
-function _required_by_role_roles_intersect($account, $roles){
+function _required_by_role_roles_intersect($account, $roles, $field){
+
   $match = array_intersect(array_keys($account->roles), $roles);
-  return !empty($match);
+  $is_required =  !empty($match);
+
+  return $is_required;
 }
 
 /**

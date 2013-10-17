@@ -3,6 +3,7 @@ description = Provides checkboxes for each field to set the required property fo
 core = 7.x
 
 files[] = tests/RequiredByRoleBasic.test
+files[] = tests/RequiredByRoleCallbackAlterTestCase.test
+files[] = tests/RequiredByRoleDateFieldWebTestCase.test
 files[] = tests/RequiredByRoleEmailFieldWebTestCase.test
 files[] = tests/RequiredByRoleImageFieldWebTestCase.test
-files[] = tests/RequiredByRoleCallbackAlterTestCase.test
