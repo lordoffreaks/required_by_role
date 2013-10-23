@@ -20,11 +20,13 @@ class RequiredByRoleImageFieldWebTestCase extends RequiredByRoleBasic {
 
     parent::setUp('image');
 
+    $rid = $this->required_fields_rid;
+
     $instance = field_info_instance('node', 'field_image', 'article');
     $instance['settings']['required_by_role'] = array(
       1 => 0,
       3 => 0,
-      $this->required_fields_rid => $this->required_fields_rid,
+      $rid => $rid,
       5 => 0,
     );
 
@@ -32,23 +34,11 @@ class RequiredByRoleImageFieldWebTestCase extends RequiredByRoleBasic {
 
   }
 
-  function testImageFieldExists(){
-
-    $this->drupalLogin($this->getRequiredUser());
-
-    $this->drupalGet('node/add/' . $this->entity_type);
-    $name = 'files[' . $this->field_name . '_und_0]';
-    $this->assertFieldByName($name);
-
-    $this->drupalLogout();
-
-  }
-
   /**
-   * Test for required role
+   * Test for required and non-required roles
    * @return [type] [description]
    */
-  function testIsRequiredRole(){
+  function testIsRequiredByRole(){
 
     $edit = array();
     $edit['title'] = $this->randomName(8);
@@ -60,17 +50,6 @@ class RequiredByRoleImageFieldWebTestCase extends RequiredByRoleBasic {
     $this->assertText('Image field is required.');
 
     $this->drupalLogout();
-  }
-
-  /**
-   * Test for non-required role
-   * @return [type] [description]
-   */
-  function testIsNonRequiredRole(){
-
-    $edit = array();
-    $edit['title'] = $this->randomName(8);
-    $edit['body[und][0][value]'] = $this->randomName(16);
 
     $this->drupalLogin($this->getNonRequiredUser());
 
@@ -79,4 +58,5 @@ class RequiredByRoleImageFieldWebTestCase extends RequiredByRoleBasic {
 
     $this->drupalLogout();
   }
+
 }

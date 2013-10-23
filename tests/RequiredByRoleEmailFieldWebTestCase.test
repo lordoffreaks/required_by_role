@@ -21,8 +21,6 @@ class RequiredByRoleEmailFieldWebTestCase extends RequiredByRoleBasic {
     parent::setUp();
     module_enable(array('email'));
 
-    $this->drupalLogin($this->getRequiredUser());
-
     $rid = (int)$this->required_fields_rid;
 
     $settings = array(
@@ -31,11 +29,13 @@ class RequiredByRoleEmailFieldWebTestCase extends RequiredByRoleBasic {
 
     $this->createEmailField(NULL, $settings);
 
-    $this->drupalLogout();
-
   }
 
-  public function testRequiredRole(){
+  /**
+   * Test for both required and non-required roles
+   * @return [type] [description]
+   */
+  public function testRequiredByRole(){
 
     $this->drupalLogin($this->getRequiredUser());
 
@@ -47,17 +47,6 @@ class RequiredByRoleEmailFieldWebTestCase extends RequiredByRoleBasic {
     $this->assertText($this->field_label . ' field is required.');
 
     $this->drupalLogout();
-  }
-
-  /**
-   * Test for non-required role
-   * @return [type] [description]
-   */
-  function testIsNonRequiredRole(){
-
-    $edit = array();
-    $edit['title'] = $this->randomName(8);
-    $edit['body[und][0][value]'] = $this->randomName(16);
 
     $this->drupalLogin($this->getNonRequiredUser());
 
@@ -68,6 +57,8 @@ class RequiredByRoleEmailFieldWebTestCase extends RequiredByRoleBasic {
   }
 
   protected function createEmailField($bundle = NULL, $settings = array()) {
+
+    $this->drupalLogin($this->getRequiredUser());
 
     $node_type = $bundle ? $bundle : $this->entity_bundle;
 
@@ -91,6 +82,8 @@ class RequiredByRoleEmailFieldWebTestCase extends RequiredByRoleBasic {
     $this->assertRaw(t('Saved %label configuration', array('%label' => $label)), 'Field added');
     node_types_rebuild();
     menu_rebuild();
+
+    $this->drupalLogout();
 
     return $field_name;
   }

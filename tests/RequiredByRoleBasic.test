@@ -16,6 +16,9 @@ abstract class RequiredByRoleBasic extends DrupalWebTestCase {
   protected $basePermissions = array();
   protected $required_fields_rid = NULL;
 
+  static $required_user = NULL;
+  static $non_required_user = NULL;
+
   protected function setUp() {
 
     $this->basePermissions = array(
@@ -51,17 +54,32 @@ abstract class RequiredByRoleBasic extends DrupalWebTestCase {
 
   protected function getRequiredUser(){
 
-    $account = $this->drupalCreateUser($this->basePermissions);
+    $account = self::$required_user;
 
-    $edit = array();
-    $edit['roles'] = array($this->required_fields_rid => $this->required_fields_rid);
+    if(is_null($account)){
 
-    return user_save($account, $edit);
+      $account = $this->drupalCreateUser($this->basePermissions);
 
+      $edit = array();
+      $edit['roles'] = array($this->required_fields_rid => $this->required_fields_rid);
+
+      $account = user_save($account, $edit);
+      self::$required_user = $account;
+
+    }
+
+    return $account;
   }
 
   protected function getNonRequiredUser(){
-    return $this->drupalCreateUser($this->basePermissions);
-  }
 
+    $account = self::$non_required_user;
+
+    if(is_null($account)){
+      $account = $this->drupalCreateUser($this->basePermissions);
+      self::$non_required_user = $account;
+    }
+
+    return $account;
+  }
 }

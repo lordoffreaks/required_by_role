@@ -5,6 +5,8 @@
  * Allows certain user roles to be exempt from required fields
  */
 
+module_load_include('inc', 'required_by_role', 'required_by_role.date');
+
 /**
  * Implements hook_help().
  */
@@ -43,15 +45,8 @@ function required_by_role_field_widget_form_alter(&$element, &$form_state, $cont
     $settings = $context['instance']['settings'];
     $field = $context['field'];
 
-    $is_required = required_by_role_get_required_property_value($element, $field);
-
-    $roles = $settings['required_by_role'] ? $settings['required_by_role'] : array();
-
-    $required_callback = _required_by_role_get_callback();
-
-    if($required_callback && function_exists($required_callback)){
-      $is_required = $required_callback($account, $roles, $field);
-    }
+    $old_required = required_by_role_get_required_property_value($element, $field);
+    $is_required = required_by_role_is_required($old_required, $account, $settings, $field);
 
     $element['#required'] = $is_required;
 
@@ -59,6 +54,28 @@ function required_by_role_field_widget_form_alter(&$element, &$form_state, $cont
     drupal_alter('required_property', $element, $field, $is_required);
 
   }
+}
+
+/**
+ * Provides a central method to figure out if the fields should be required
+ * or not based on the current callback.
+ * @param  [type] $is_required [description]
+ * @param  [type] $account     [description]
+ * @param  [type] $settings    [description]
+ * @param  [type] $field       [description]
+ * @return [type]              [description]
+ */
+function required_by_role_is_required($is_required, $account, $settings, $field){
+
+  $roles = $settings['required_by_role'] ? $settings['required_by_role'] : array();
+
+  $required_callback = _required_by_role_get_callback();
+
+  if($required_callback && function_exists($required_callback)){
+    $is_required = $required_callback($account, $roles, $field);
+  }
+
+  return $is_required;
 }
 
 function _required_by_role_get_callback(){
@@ -159,7 +176,7 @@ function required_by_role_form_field_ui_field_edit_form_alter(&$form, $form_stat
   $field_name = $form['#field']['field_name'];
   $required_by_role = $form['#instance']['settings']['required_by_role'];
   $label = t('Required by role');
-  $description = t('Select this if you want this field to be required for ALL ROLES, otherwise choose specific roles in the checkboxes, below, under %name' , array('%name' => 'Required by role'));
+  $description = t('Select this option if you want this field to be required for ALL ROLES, otherwise choose specific roles in the checkboxes, below, under %name' , array('%name' => 'Required by role'));
 
   $roles = user_roles();
   unset($roles[DRUPAL_AUTHENTICATED_RID]);
