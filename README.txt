@@ -6,7 +6,7 @@ required fields.
 
 INSTALLATION:
 -------------
-1. Place the entire contents of this module into your /sites/*/modules
-directory. The asterisk represents either all or one of your multisite
-folders
+1. Place the entire contents of this module into your /modules
+directory.
+
 2. Navigate to the administer > modules page and enable the module.

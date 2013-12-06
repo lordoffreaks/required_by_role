@@ -35,10 +35,54 @@ function required_by_role_field_info_alter(&$info) {
  */
 function required_by_role_field_widget_form_alter(&$element, &$form_state, $context) {
 
-  if (!$context['instance']['required']) {
-    global $user;
+  $field_definition = $context['items']->getFieldDefinition();
 
-    $account = $user;
+  $is_required = $field_definition->isFieldRequired();
+  $required_by_role = $field_definition->getFieldSetting('required_by_role');
+
+  if('field_test_field' == $field_definition->getFieldName()){
+
+  }
+
+  if (!$is_required && !empty($required_by_role)) {
+
+    $account = \Drupal::currentUser();
+
+
+
+    /*
+    $formatter_manager = Drupal::service('plugin.manager.field.formatter');
+    $display_options = $formatter_manager->prepareConfiguration($field_definition->getFieldType(), $display_options);
+    $formatter = $formatter_manager->getInstance(array(
+      'field_definition' => $field_definition,
+      'view_mode' => $view_mode,
+      'prepare' => FALSE,
+      'configuration' => $display_options,
+    ));
+    */
+
+    //$field_widgets = \Drupal::service('plugin.manager.field.widget')->getDefinitions();
+    //$rbr_plugins = \Drupal::service('plugin.manager.required_by_role')->getDefinitions();
+
+    $rbr_manager = \Drupal::service('plugin.manager.required_by_role');
+
+
+    $options = array(
+      'plugin_id' => $context['widget']->getPluginId(),
+      //'field' => $field_definition
+    );
+
+    $rbr = $rbr_manager->getInstance($options);
+
+    debug($rbr, 'rbr');
+
+    $rbr->isRequired($element, $field_definition);
+  }
+
+/*
+  if (!$context['instance']['required']) {
+    $account = \Drupal::currentUser();
+
     $settings = $context['instance']['settings'];
 
     $roles = $settings['required_by_role'] ? $settings['required_by_role'] : array();
@@ -59,6 +103,7 @@ function required_by_role_field_widget_form_alter(&$element, &$form_state, $cont
     }
 
   }
+  */
 }
 
 /**
@@ -68,21 +113,21 @@ function required_by_role_field_widget_form_alter(&$element, &$form_state, $cont
  * @return boolean  TRUE if $account->roles contains one or more $roles values
  */
 function _required_by_role_roles_intersect($account, $roles){
-  $match = array_intersect(array_keys($account->roles), $roles);
+  $match = array_intersect(array_keys($account->getRoles()), $roles);
   return !empty($match);
 }
 
 /**
  * Implements hook_form_FORM_ID_alter().
  */
-function required_by_role_form_field_ui_field_edit_form_alter(&$form, $form_state) {
-
-  $field_name = $form['#field']['field_name'];
-  $required_by_role = $form['#instance']['settings']['required_by_role'];
-  $label = t('Required by role');
-  $description = t('Select this if you want this field to be required for ALL ROLES, otherwise choose specific roles in the checkboxes, below, under %name' , array('%name' => 'Required by role'));
+function required_by_role_form_field_ui_field_instance_edit_form_alter(&$form, $form_state) {
 
   $roles = user_roles();
+  $field_name = $form['#field']->getFieldName();
+  $settings = $form_state['instance']->getFieldSettings();
+
+  $label = t('Required by role');
+  $description = t('Select this if you want this field to be required for ALL ROLES, otherwise choose specific roles in the checkboxes, below, under %name' , array('%name' => 'Required by role'));
 
   unset($roles[DRUPAL_AUTHENTICATED_RID]);
 
@@ -90,8 +135,10 @@ function required_by_role_form_field_ui_field_edit_form_alter(&$form, $form_stat
     'name' => t('Role'),
   );
 
-  foreach($roles as $rid => $role){
-    $options[$rid] = array(
+  $options = array();
+
+  foreach($roles as $role){
+    $options[$role->id()] = array(
       'name' => $role->label(),
     );
   }
@@ -111,7 +158,7 @@ function required_by_role_form_field_ui_field_edit_form_alter(&$form, $form_stat
     '#type' => 'tableselect',
     '#header' => $header,
     '#options' => $options,
-    '#default_value' => $required_by_role,
+    '#default_value' => $settings['required_by_role'],
     '#weight' => $form['instance']['required']['#weight'] + 1,
     '#disabled' => $form['instance']['required']['#default_value'],
     '#attached' => $attached,
@@ -126,6 +173,7 @@ function required_by_role_form_field_ui_field_edit_form_alter(&$form, $form_stat
   $form['instance']['required']['#description'] = $description;
 
   // Default value needs allways to be NOT required.
-  $form['instance']['default_value_widget'][$field_name][LANGUAGE_NOT_SPECIFIED][0]['#required'] = FALSE;
+  $form['instance']['default_value'][$field_name]['widget'][0]['#required'] = FALSE;
+  $form['instance']['default_value'][$field_name]['widget'][0]['value']['#required'] = FALSE;
 
 }
