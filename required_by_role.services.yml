@@ -1,4 +1,0 @@
-services:
-  plugin.manager.required_by_role:
-    class: Drupal\required_by_role\RequiredByRoleManager
-    parent: default_plugin_manager

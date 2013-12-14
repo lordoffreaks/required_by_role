@@ -35,7 +35,9 @@ class RequiredByRole extends RequiredBase {
    */
   public function isRequired(FieldInstance $field, $account){
 
-    $match = array_intersect($account->getRoles(), $field->required);
+    $roles = !empty($field->required) ? $field->required : array();
+
+    $match = array_intersect($account->getRoles(), $roles);
     $isRequired = !empty($match);
 
     return $isRequired;
@@ -50,7 +52,6 @@ class RequiredByRole extends RequiredBase {
     unset($roles[DRUPAL_AUTHENTICATED_RID]);
 
     $label = t('Required field');
-    $description = t('Select this if you want this field to be required for ALL ROLES, otherwise choose specific roles in the checkboxes, below, under %name' , array('%name' => 'Required by role'));
 
     $header = array(
       'name' => t('Role'),
@@ -87,7 +88,6 @@ class RequiredByRole extends RequiredBase {
       '#attributes' => array(
         'id' => array('tableselect-required-by-role'),
       ),
-      '#description' => $description,
     );
 
     return $element;
