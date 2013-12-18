@@ -35,14 +35,21 @@ class RequiredByRole extends RequiredBase {
    */
   public function isRequired(FieldInstance $field, $account){
 
-    $roles = !empty($field->required) ? $field->required : array();
 
-    $match = array_intersect($account->getRoles(), $roles);
-    $isRequired = !empty($match);
+    $isRequired = $this->getMatches($account->getRoles(), $field->required);
 
     return $isRequired;
   }
 
+  public function getMatches($user_roles, $roles){
+
+    $required_roles = $roles ? $roles : array();
+    $user_roles = $user_roles ? $user_roles : array();
+
+    $match = array_intersect($user_roles, $required_roles);
+
+    return !empty($match);
+  }
 
   public function requiredFormElement(FieldInstance $field){
 
