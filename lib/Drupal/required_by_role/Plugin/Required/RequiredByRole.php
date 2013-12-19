@@ -24,24 +24,36 @@ class RequiredByRole extends RequiredBase {
   /**
    * Determines wether a field is required or not.
    *
-   * @param array $context
-   *   An array of contexts provided by the implementation.
-   *
    * @param \Drupal\field\Entity\FieldInstance $field
-   *   An image file object.
+   *   An field instance object.
+   *
+   * @param \Drupal\user\Entity\User $account
+   *   An account object.
    *
    * @return bool
    *   TRUE on required. FALSE otherwise.
    */
-  public function isRequired(FieldInstance $field, $account){
+  public function isRequired(FieldInstance $field, $account) {
 
 
-    $isRequired = $this->getMatches($account->getRoles(), $field->required);
+    $is_required = $this->getMatches($account->getRoles(), $field->required);
 
-    return $isRequired;
+    return $is_required;
   }
 
-  public function getMatches($user_roles, $roles){
+  /**
+   * Helper method to test if the role exists into the allowed ones.
+   *
+   * @param array $user_roles
+   *   Roles belonging to the user.
+   *
+   * @param array $roles
+   *   Roles that are required for this field.
+   *
+   * @return bool
+   *   Wether or not the user have a required role.
+   */
+  public function getMatches($user_roles, $roles) {
 
     $required_roles = $roles ? $roles : array();
     $user_roles = $user_roles ? $user_roles : array();
@@ -51,7 +63,16 @@ class RequiredByRole extends RequiredBase {
     return !empty($match);
   }
 
-  public function requiredFormElement(FieldInstance $field){
+  /**
+   * Form element to build the required property.
+   *
+   * @param FieldInstance $field
+   *   The field instance
+   *
+   * @return array
+   *   Form element
+   */
+  public function requiredFormElement(FieldInstance $field) {
 
     $field_name = $field->getName();
     $roles = user_roles();
@@ -66,7 +87,7 @@ class RequiredByRole extends RequiredBase {
 
     $options = array();
 
-    foreach($roles as $role){
+    foreach ($roles as $role) {
       $options[$role->id()] = array(
         'name' => $role->label(),
       );

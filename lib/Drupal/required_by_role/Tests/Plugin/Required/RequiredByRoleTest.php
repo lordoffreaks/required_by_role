@@ -27,6 +27,12 @@ class RequiredByRoleTest extends UnitTestCase {
    */
   protected $plugin;
 
+  /**
+   * Method getInfo.
+   *
+   * @return array
+   *   Information regarding to the tests.
+   */
   public static function getInfo() {
     return array(
       'name' => 'Required by role plugin',
@@ -49,8 +55,7 @@ class RequiredByRoleTest extends UnitTestCase {
   /**
    * Tests the required by role behavior.
    *
-   * @dataProvider getRequiredCases
-   *
+   * @dataProvider getRequiredCase
    */
   public function testRequiredByRole($result, $user_roles, $required_roles) {
 
@@ -66,7 +71,7 @@ class RequiredByRoleTest extends UnitTestCase {
 
     // array(bool $result, array $user_roles, array $required_roles)
     return array(
-      // User with matching roles
+      // User with matching roles.
       array(
         TRUE,
         array(
@@ -77,7 +82,7 @@ class RequiredByRoleTest extends UnitTestCase {
           'administrator',
         ),
       ),
-      // User with no matching roles
+      // User with no matching roles.
       array(
         FALSE,
         array(
@@ -88,7 +93,7 @@ class RequiredByRoleTest extends UnitTestCase {
           'anonymous',
         ),
       ),
-      // No required roles set
+      // No required roles set.
       array(
         FALSE,
         array(
@@ -97,7 +102,7 @@ class RequiredByRoleTest extends UnitTestCase {
         ),
         array(),
       ),
-      // required roles is not an array
+      // Required roles is not an array.
       array(
         FALSE,
         array(
@@ -106,7 +111,7 @@ class RequiredByRoleTest extends UnitTestCase {
         ),
         NULL,
       ),
-      // the user has no roles.
+      // The user has no roles.
       array(
         FALSE,
         NULL,
@@ -115,7 +120,7 @@ class RequiredByRoleTest extends UnitTestCase {
           'administrator',
         ),
       ),
-      // the user has no roles and there is no required roles.
+      // The user has no roles and there is no required roles.
       array(
         FALSE,
         NULL,
