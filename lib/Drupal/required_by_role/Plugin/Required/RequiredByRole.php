@@ -35,9 +35,7 @@ class RequiredByRole extends RequiredBase {
    */
   public function isRequired(FieldInstance $field, $account) {
 
-
     $is_required = $this->getMatches($account->getRoles(), $field->required);
-
     return $is_required;
   }
 
@@ -74,16 +72,10 @@ class RequiredByRole extends RequiredBase {
    */
   public function requiredFormElement(FieldInstance $field) {
 
-    $field_name = $field->getName();
     $roles = user_roles();
+    $default_value = isset($field->required) && is_array($field->required) ? $field->required : array();
 
     unset($roles[DRUPAL_AUTHENTICATED_RID]);
-
-    $label = t('Required field');
-
-    $header = array(
-      'name' => t('Role'),
-    );
 
     $options = array();
 
@@ -93,33 +85,24 @@ class RequiredByRole extends RequiredBase {
       );
     }
 
-    $module_path = drupal_get_path('module', 'required_by_role');
-
-    // Js add, needed because STATES API behaves unproperly
-    // in this context hidding required option.
-    $attached = array(
-      'js' => array(
-        $module_path . '/required_by_role.js',
-      ),
+    $header = array(
+      'name' => array('data' => t('Role')),
     );
 
-    $default_value = isset($field->required) ? $field->required : array();
-
     $element = array(
-      '#prefix' => '<label>' . $label . '</label>',
       '#type' => 'tableselect',
       '#header' => $header,
       '#options' => $options,
       '#default_value' => $default_value,
-      '#attached' => $attached,
+      '#js_select' => TRUE,
+      '#multiple' => TRUE,
       '#empty' => t('No roles available.'),
       '#attributes' => array(
-        'id' => array('tableselect-required-by-role'),
+        'class' => array('tableselect-required-by-role'),
       ),
     );
 
     return $element;
-
   }
 
 }
