@@ -55,7 +55,7 @@ class RequiredByRoleTest extends UnitTestCase {
   /**
    * Tests the required by role behavior.
    *
-   * @dataProvider getRequiredCase
+   * @dataProvider getRequiredCases
    */
   public function testRequiredByRole($result, $user_roles, $required_roles) {
 
