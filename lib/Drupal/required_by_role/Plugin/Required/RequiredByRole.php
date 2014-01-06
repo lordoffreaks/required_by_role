@@ -7,6 +7,7 @@
 namespace Drupal\required_by_role\Plugin\Required;
 
 use Drupal\Core\Annotation\Translation;
+use Drupal\Core\Session\AccountInterface;
 use Drupal\field\Entity\FieldInstance;
 use Drupal\required_api\Annotation\Required;
 use Drupal\required_api\Plugin\Required\RequiredBase;
@@ -33,7 +34,7 @@ class RequiredByRole extends RequiredBase {
    * @return bool
    *   TRUE on required. FALSE otherwise.
    */
-  public function isRequired(FieldInstance $field, $account) {
+  public function isRequired(FieldInstance $field, AccountInterface $account) {
 
     $is_required = $this->getMatches($account->getRoles(), $field->required);
     return $is_required;
