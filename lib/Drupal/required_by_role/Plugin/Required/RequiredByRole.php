@@ -8,7 +8,7 @@ namespace Drupal\required_by_role\Plugin\Required;
 
 use Drupal\Core\Annotation\Translation;
 use Drupal\Core\Session\AccountInterface;
-use Drupal\field\Entity\FieldInstance;
+use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\required_api\Annotation\Required;
 use Drupal\required_api\Plugin\Required\RequiredBase;
 
@@ -25,7 +25,7 @@ class RequiredByRole extends RequiredBase {
   /**
    * Determines wether a field is required or not.
    *
-   * @param \Drupal\field\Entity\FieldInstance $field
+   * @param \Drupal\Core\Field\FieldDefinitionInterface $field
    *   An field instance object.
    *
    * @param \Drupal\user\Entity\User $account
@@ -34,7 +34,7 @@ class RequiredByRole extends RequiredBase {
    * @return bool
    *   TRUE on required. FALSE otherwise.
    */
-  public function isRequired(FieldInstance $field, AccountInterface $account) {
+  public function isRequired(FieldDefinitionInterface $field, AccountInterface $account) {
 
     $is_required = $this->getMatches($account->getRoles(), $field->required);
     return $is_required;
@@ -65,13 +65,13 @@ class RequiredByRole extends RequiredBase {
   /**
    * Form element to build the required property.
    *
-   * @param FieldInstance $field
+   * @param \Drupal\Core\Field\FieldDefinitionInterface $field
    *   The field instance
    *
    * @return array
    *   Form element
    */
-  public function requiredFormElement(FieldInstance $field) {
+  public function requiredFormElement(FieldDefinitionInterface $field) {
 
     $roles = user_roles();
     $default_value = isset($field->required) && is_array($field->required) ? $field->required : array();
