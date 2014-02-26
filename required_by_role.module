@@ -50,63 +50,59 @@ function required_by_role_field_widget_form_alter(&$element, &$form_state, $cont
 
     $element['#required'] = $is_required;
 
-    // Give the opportunity to other modules to act on this property
+    // Give the opportunity to other modules to act on this property.
     drupal_alter('required_property', $element, $field, $is_required);
 
   }
 }
 
 /**
- * Provides a central method to figure out if the fields should be required
- * or not based on the current callback.
- * @param  [type] $is_required [description]
- * @param  [type] $account     [description]
- * @param  [type] $settings    [description]
- * @param  [type] $field       [description]
- * @return [type]              [description]
+ * Central method to figure out if the fields should be required or not based on the current callback.
  */
-function required_by_role_is_required($is_required, $account, $settings, $field){
+function required_by_role_is_required($is_required, $account, $settings, $field) {
 
   $roles = $settings['required_by_role'] ? $settings['required_by_role'] : array();
 
   $required_callback = _required_by_role_get_callback();
 
-  if($required_callback && function_exists($required_callback)){
+  if ($required_callback && function_exists($required_callback)) {
     $is_required = $required_callback($account, $roles, $field);
   }
 
   return $is_required;
 }
+/**
+ * Helper function to get the callback.
+ */
+function _required_by_role_get_callback() {
 
-function _required_by_role_get_callback(){
+  $required_callback = module_invoke('required_by_role', 'required_by_role_callback');
 
-    $required_callback = module_invoke('required_by_role', 'required_by_role_callback');
+  // We give here the opportunity to change the callback function.
+  drupal_alter('required_by_role_callback', $required_callback);
 
-    // We give here the opportunity to change the callback function
-    drupal_alter('required_by_role_callback', $required_callback);
-
-    return $required_callback;
+  return $required_callback;
 }
 
 /**
  * Get required property per field.
  *
  * @TODO: Figure out how to allow to other modules to act here.
- *
- * @param  [type] $element [description]
- * @param  [type] $field   [description]
  */
-function required_by_role_get_required_property_value($element, $field){
+function required_by_role_get_required_property_value($element, $field) {
 
   $type = $field['type'];
 
   switch ($type) {
     case 'image':
+    case 'fivestar':
       $is_required = $element[0]['#required'];
       break;
+
     case 'email':
       $is_required = $element['email']['#required'];
       break;
+
     default:
       $is_required = $element['#required'];
       break;
@@ -116,24 +112,24 @@ function required_by_role_get_required_property_value($element, $field){
 }
 
 /**
- * hook_required_property_alter implementation.
+ * Implements hook_required_property_alter.
  *
  * Currently adds support for standard fields, image, and email.
- *
- * @param  [type] $element [description]
- * @param  [type] $field   [description]
  */
-function required_by_role_required_property_alter(&$element, $field, $is_required){
+function required_by_role_required_property_alter(&$element, $field, $is_required) {
 
   $type = $field['type'];
 
   switch ($type) {
     case 'image':
+    case 'fivestar':
       $element[0]['#required'] = $is_required;
       break;
+
     case 'email':
       $element['email']['#required'] = $is_required;
       break;
+
     default:
       $element['value']['#required'] = $is_required;
       break;
@@ -143,27 +139,21 @@ function required_by_role_required_property_alter(&$element, $field, $is_require
 }
 
 /**
- * Implements hook_required_by_role_callback
- * @return string callback function to determine if the field is required or not
+ * Implements hook_required_by_role_callback.
+ * @return string
+ *   Callback function to determine if the field is required or not
  */
-function required_by_role_required_by_role_callback(){
+function required_by_role_required_by_role_callback() {
   return '_required_by_role_roles_intersect';
 }
 
 /**
- * Checks if at least one of $roles values are in the $account->roles array.
- * Typical callback function to determine if for the current role
- * the field is mandatory.
- *
- * @param  object   $account user account object
- * @param  array    $roles   array of roles in format array('rid' => 'name');
- * @param  array    $field   The actual field.
- * @return boolean  TRUE if $account->roles contains one or more $roles values
+ * At least one of $roles values is in the $account->roles array?.
  */
-function _required_by_role_roles_intersect($account, $roles, $field){
+function _required_by_role_roles_intersect($account, $roles, $field) {
 
   $match = array_intersect(array_keys($account->roles), $roles);
-  $is_required =  !empty($match);
+  $is_required = empty($match);
 
   return $is_required;
 }
@@ -176,7 +166,7 @@ function required_by_role_form_field_ui_field_edit_form_alter(&$form, $form_stat
   $field_name = $form['#field']['field_name'];
   $required_by_role = $form['#instance']['settings']['required_by_role'];
   $label = t('Required by role');
-  $description = t('Select this option if you want this field to be required for ALL ROLES, otherwise choose specific roles in the checkboxes, below, under %name' , array('%name' => 'Required by role'));
+  $description = t('Select this option if you want this field to be required for ALL ROLES, otherwise choose specific roles in the checkboxes, below, under %name', array('%name' => 'Required by role'));
 
   $roles = user_roles();
   unset($roles[DRUPAL_AUTHENTICATED_RID]);
@@ -185,7 +175,7 @@ function required_by_role_form_field_ui_field_edit_form_alter(&$form, $form_stat
     'name' => t('Role'),
   );
 
-  foreach($roles as $rid => $role){
+  foreach ($roles as $rid => $role) {
     $options[$rid] = array(
       'name' => $role,
     );
