@@ -45,14 +45,77 @@ function required_by_role_field_widget_form_alter(&$element, &$form_state, $cont
     $settings = $context['instance']['settings'];
     $field = $context['field'];
 
-    $old_required = required_by_role_get_required_property_value($element, $field);
-    $is_required = required_by_role_is_required($old_required, $account, $settings, $field);
+    // Getting the current value for required.
+    $required = required_by_role_get_required_property_value($element, $field);
 
-    $element['#required'] = $is_required;
+    // Getting the value based on our rules.
+    $is_required = required_by_role_is_required($required, $account, $settings, $field);
+
+    // Recreating the whole element.
+    // We need to do that because the hook_field_widget_form_alter acts late in
+    // field_default_form and the element is already created, so the property
+    // is not propagated.
+    _required_by_role_recreate_element($element, $form_state, $context, $is_required);
 
     // Give the opportunity to other modules to act on this property.
     drupal_alter('required_property', $element, $field, $is_required);
 
+  }
+}
+
+/**
+ * Helper function to recreate the element.
+ *
+ * Mostly copied from field_default_form in field.form.inc file.
+ */
+function _required_by_role_recreate_element(&$element, &$form_state, $context, $is_required) {
+
+  $get_delta = $context['delta'];
+
+  $field_name = $context['field']['field_name'];
+  $instance = $context['instance'];
+  $field = $context['field'];
+  $langcode = $context['langcode'];
+  $items = $context['items'];
+  $form = $context['form'];
+  $entity = isset($context['form']['#entity']) ? $context['form']['#entity'] : NULL;
+  $parents = $context['form']['#parents'];
+
+  // Important to set here to be inherited by the children.
+  $instance['required'] = $is_required;
+
+  // If field module handles multiple values for this form element, and we are
+  // displaying an individual element, process the multiple value form.
+  if (!isset($get_delta) && field_behaviors_widget('multiple values', $instance) == FIELD_BEHAVIOR_DEFAULT) {
+    // Store the entity in the form.
+    $form['#entity'] = $entity;
+    $elements = field_multiple_value_form($field, $instance, $langcode, $items, $form, $form_state);
+  }
+  // If the widget is handling multiple values (e.g Options), or if we are
+  // displaying an individual element, just get a single form element and make
+  // it the $delta value.
+  else {
+    $delta = isset($get_delta) ? $get_delta : 0;
+    $function = $instance['widget']['module'] . '_field_widget_form';
+    if (function_exists($function)) {
+      $element = array(
+        '#entity' => $entity,
+        '#entity_type' => $instance['entity_type'],
+        '#bundle' => $instance['bundle'],
+        '#field_name' => $field_name,
+        '#language' => $langcode,
+        '#field_parents' => $parents,
+        '#columns' => array_keys($field['columns']),
+        '#title' => check_plain($instance['label']),
+        '#description' => field_filter_xss($instance['description']),
+        // Only the first widget should be required.
+        '#required' => $delta == 0 && $is_required,
+        '#delta' => $delta,
+      );
+
+      $element = $function($form, $form_state, $field, $instance, $langcode, $items, $delta, $element);
+
+    }
   }
 }
 
@@ -153,7 +216,7 @@ function required_by_role_required_by_role_callback() {
 function _required_by_role_roles_intersect($account, $roles, $field) {
 
   $match = array_intersect(array_keys($account->roles), $roles);
-  $is_required = empty($match);
+  $is_required = !empty($match);
 
   return $is_required;
 }
@@ -209,6 +272,13 @@ function required_by_role_form_field_ui_field_edit_form_alter(&$form, $form_stat
   $form['instance']['required']['#description'] = $description;
 
   // Default value needs always to be NOT required.
-  $form['instance']['default_value_widget'][$field_name][LANGUAGE_NONE][0]['#required'] = FALSE;
+  $default_value_widget = &$form['instance']['default_value_widget'][$field_name][LANGUAGE_NONE];
+
+  if (isset($default_value_widget[0]['#required'])) {
+    $default_value_widget[0]['#required'] = FALSE;
+  }
+  else {
+    $default_value_widget['#required'] = FALSE;
+  }
 
 }
