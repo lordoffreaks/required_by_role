@@ -45,11 +45,8 @@ function required_by_role_field_widget_form_alter(&$element, &$form_state, $cont
     $settings = $context['instance']['settings'];
     $field = $context['field'];
 
-    // Getting the current value for required.
-    $required = required_by_role_get_required_property_value($element, $field);
-
     // Getting the value based on our rules.
-    $is_required = required_by_role_is_required($required, $account, $settings, $field);
+    $is_required = required_by_role_is_required($account, $settings, $field);
 
     // Recreating the whole element.
     // We need to do that because the hook_field_widget_form_alter acts late in
@@ -71,6 +68,8 @@ function required_by_role_field_widget_form_alter(&$element, &$form_state, $cont
 function _required_by_role_recreate_element(&$element, &$form_state, $context, $is_required) {
 
   $get_delta = $context['delta'];
+
+  $is_required = $is_required !== NULL ? $is_required : $instance['required'];
 
   $field_name = $context['field']['field_name'];
   $instance = $context['instance'];
@@ -122,18 +121,21 @@ function _required_by_role_recreate_element(&$element, &$form_state, $context, $
 /**
  * Central method to figure out if the fields should be required or not based on the current callback.
  */
-function required_by_role_is_required($is_required, $account, $settings, $field) {
+function required_by_role_is_required($account, $settings, $field) {
+
+  $is_required = NULL;
 
   $roles = $settings['required_by_role'] ? $settings['required_by_role'] : array();
 
   $required_callback = _required_by_role_get_callback();
 
-  if ($required_callback && function_exists($required_callback)) {
+  if (is_callable($required_callback)) {
     $is_required = $required_callback($account, $roles, $field);
   }
 
   return $is_required;
 }
+
 /**
  * Helper function to get the callback.
  */
@@ -145,60 +147,6 @@ function _required_by_role_get_callback() {
   drupal_alter('required_by_role_callback', $required_callback);
 
   return $required_callback;
-}
-
-/**
- * Get required property per field.
- *
- * @TODO: Figure out how to allow to other modules to act here.
- */
-function required_by_role_get_required_property_value($element, $field) {
-
-  $type = $field['type'];
-
-  switch ($type) {
-    case 'image':
-    case 'fivestar':
-      $is_required = $element[0]['#required'];
-      break;
-
-    case 'email':
-      $is_required = $element['email']['#required'];
-      break;
-
-    default:
-      $is_required = $element['#required'];
-      break;
-  }
-
-  return $is_required;
-}
-
-/**
- * Implements hook_required_property_alter.
- *
- * Currently adds support for standard fields, image, and email.
- */
-function required_by_role_required_property_alter(&$element, $field, $is_required) {
-
-  $type = $field['type'];
-
-  switch ($type) {
-    case 'image':
-    case 'fivestar':
-      $element[0]['#required'] = $is_required;
-      break;
-
-    case 'email':
-      $element['email']['#required'] = $is_required;
-      break;
-
-    default:
-      $element['value']['#required'] = $is_required;
-      break;
-  }
-
-  return $element;
 }
 
 /**
