@@ -1,6 +1,8 @@
 name = Required by role test
 description = Module for testing purposes
 
+hidden = TRUE
+
 core = 7.x
 dependencies[] = date
 dependencies[] = date_popup
