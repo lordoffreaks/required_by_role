@@ -54,19 +54,25 @@ function required_by_role_date_popup_process_alter(&$element, &$form_state, $con
   global $user;
 
   $account = $user;
-  $settings = $element['#instance']['settings'];
-  $field = $element['#field'];
 
-  $is_required = required_by_role_is_required($account, $settings, $field);
+  if (isset($element['#field'])) {
 
-  $granularity = date_format_order($element['#date_format']);
-  $has_time = date_has_time($granularity);
+    $field = $element['#field'];
+    $settings = $element['#instance']['settings'];
 
-  $element['#required'] = $element['date']['#required'] = $is_required;
+    $is_required = required_by_role_is_required($account, $settings, $field);
 
-  if ($has_time) {
-    $element['time']['#required'] = $is_required;
+    $granularity = date_format_order($element['#date_format']);
+    $has_time = date_has_time($granularity);
+
+    $element['#required'] = $element['date']['#required'] = $is_required;
+
+    if ($has_time) {
+      $element['time']['#required'] = $is_required;
+    }
+
   }
+
 }
 
 /**
