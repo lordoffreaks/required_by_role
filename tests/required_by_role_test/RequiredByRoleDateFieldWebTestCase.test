@@ -18,7 +18,17 @@ class RequiredByRoleDateFieldWebTestCase extends RequiredByRoleBasic {
 
     // Load the date_api module.
     parent::setUp();
-    $modules = array('field', 'field_ui', 'date_api', 'date', 'date_popup', 'date_tools');
+    $modules = array(
+      'field',
+      'field_ui',
+      'date_api',
+      'date',
+      'date_popup',
+      'date_tools',
+      'required_by_role',
+      'required_by_role_test',
+    );
+
     module_enable($modules);
 
     variable_set('date_popup_timepicker', 'none');
@@ -27,9 +37,17 @@ class RequiredByRoleDateFieldWebTestCase extends RequiredByRoleBasic {
     module_load_include('inc', 'date', 'date_admin');
 
   }
+
   /**
-   * [testRequiredRole description]
-   * @return [type] [description]
+   * Testing date_popup element in a non field form.
+   */
+  public function testDatePopupElementForm() {
+    $this->drupalGet('form-date-element-test');
+    $this->assertNoText('Notice: Undefined index: #instance in required_by_role_date_popup_process_alter()', "No undefined index error found.");
+  }
+
+  /**
+   * [testRequiredRole description].
    *
    * @todo Test with blank default value
    * @todo Test with now default value
@@ -165,7 +183,6 @@ class RequiredByRoleDateFieldWebTestCase extends RequiredByRoleBasic {
     $input_format_custom = !empty($input_format_custom) ? $input_format_custom : '';
     $text_parts = !empty($text_parts) ? $text_parts : array();
     $increment = !empty($increment) ? $increment : 15;
-    //$default_value = !empty($default_value) ? $default_value : 'now';
     $default_value = !empty($default_value) ? $default_value : 'blank';
     $default_value2 = !empty($default_value2) ? $default_value2 : 'blank';
     $default_format = !empty($default_format) ? $default_format : 'long';

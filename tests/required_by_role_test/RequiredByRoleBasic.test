@@ -37,6 +37,7 @@ abstract class RequiredByRoleBasic extends DrupalWebTestCase {
     $modules[] = 'field';
     $modules[] = 'field_ui';
     $modules[] = 'required_by_role';
+    $modules[] = 'required_by_role_test';
 
     parent::setUp($modules);
 
@@ -48,7 +49,7 @@ abstract class RequiredByRoleBasic extends DrupalWebTestCase {
     module_load_include('inc', 'field', 'field.crud');
     module_load_include('inc', 'node', 'node.pages');
 
-    // Create a role for required fields
+    // Create a role for required fields.
     $this->required_fields_rid = $this->drupalCreateRole($this->basePermissions, 'Required fields role');
   }
 

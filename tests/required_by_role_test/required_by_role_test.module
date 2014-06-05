@@ -1,21 +1,57 @@
 <?php
+/**
+ * @file
+ * Module for testing.
+ */
 
 /**
- * Implements hook_required_by_role_callback_alter
- * @param  [type] $callback [description]
- * @return [type]           [description]
+ * Implements hook_menu().
  */
-function required_by_role_test_required_by_role_callback_alter(&$callback){
+function required_by_role_test_menu() {
+
+  $items = array();
+  $items['form-date-element-test'] = array(
+    'title' => 'Form date element test.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('required_by_role_test_date_select_form'),
+    'access callback' => TRUE,
+  );
+  return $items;
+}
+
+/**
+ * Implements hook_form().
+ */
+function required_by_role_test_date_select_form($form, &$form_state) {
+
+  $form = array(
+    '#date' => new DateTime(),
+  );
+
+  $form['date'] = array(
+    '#type' => 'date_popup',
+    '#date_format' => 'm/d/Y',
+    '#default_value' => $form['#date']->format('Y-m-d'),
+  );
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Submit'),
+  );
+
+  return $form;
+}
+
+/**
+ * Implements hook_required_by_role_callback_alter.
+ */
+function required_by_role_test_required_by_role_callback_alter(&$callback) {
   $callback = 'required_by_role_test_required_callback';
 }
 
 /**
- * Test callback for hook_required_by_role_callback_alter
- * @param  [type] $account [description]
- * @param  [type] $roles   [description]
- * @param  [type] $field   [description]
- * @return bool          [description]
+ * Test callback for hook_required_by_role_callback_alter.
  */
-function required_by_role_test_required_callback($account, $roles, $field){
+function required_by_role_test_required_callback($account, $roles, $field) {
   return TRUE;
 }
