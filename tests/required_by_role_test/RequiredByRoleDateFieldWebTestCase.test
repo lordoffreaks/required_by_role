@@ -6,6 +6,9 @@
 
 class RequiredByRoleDateFieldWebTestCase extends RequiredByRoleBasic {
 
+  /**
+   * GetInfo method.
+   */
   public static function getInfo() {
     return array(
       'name' => 'Required by role: Date',
@@ -14,6 +17,9 @@ class RequiredByRoleDateFieldWebTestCase extends RequiredByRoleBasic {
     );
   }
 
+  /**
+   * Setup method.
+   */
   protected function setUp() {
 
     // Load the date_api module.
@@ -43,11 +49,11 @@ class RequiredByRoleDateFieldWebTestCase extends RequiredByRoleBasic {
    */
   public function testDatePopupElementForm() {
     $this->drupalGet('form-date-element-test');
-    $this->assertNoText('Notice: Undefined index: #instance in required_by_role_date_popup_process_alter()', "No undefined index error found.");
+    $this->assertNoText('Notice: Undefined index: #instance in required_by_role_', "No undefined index error found.");
   }
 
   /**
-   * [testRequiredRole description].
+   * Test for required roles.
    *
    * @todo Test with blank default value
    * @todo Test with now default value
@@ -55,7 +61,7 @@ class RequiredByRoleDateFieldWebTestCase extends RequiredByRoleBasic {
    * @todo Test with todate optional value
    * @todo Test with todate required value
    */
-  public function testRequiredRole(){
+  public function testRequiredRole() {
 
     $this->drupalLogin($this->getRequiredUser());
 
@@ -63,7 +69,7 @@ class RequiredByRoleDateFieldWebTestCase extends RequiredByRoleBasic {
     $edit['title'] = $this->randomName(8);
     $edit['body[und][0][value]'] = $this->randomName(16);
 
-    $rid = (int)$this->required_fields_rid;
+    $rid = (int) $this->required_fields_rid;
 
     $required_by_role_settings = array(
       $rid => $rid,
@@ -102,11 +108,7 @@ class RequiredByRoleDateFieldWebTestCase extends RequiredByRoleBasic {
             $this->assertText('A valid date is required for ' . $label . ' End date.');
             break;
 
-          default:
-
-            break;
         }
-
 
         $this->deleteDateField($label);
       }
@@ -116,11 +118,9 @@ class RequiredByRoleDateFieldWebTestCase extends RequiredByRoleBasic {
   }
 
   /**
-   * Test for non-required role
-   * @return [type] [description]
-   *
+   * Test for non-required role.
    */
-  function testIsNonRequiredRole(){
+  public function testIsNonRequiredRole() {
 
     $edit = array();
     $edit['title'] = $this->randomName(8);
@@ -128,7 +128,7 @@ class RequiredByRoleDateFieldWebTestCase extends RequiredByRoleBasic {
 
     $this->drupalLogin($this->getNonRequiredUser());
 
-    $rid = (int)$this->required_fields_rid;
+    $rid = (int) $this->required_fields_rid;
 
     $required_by_role_settings = array(
       $rid => $rid,
@@ -163,10 +163,11 @@ class RequiredByRoleDateFieldWebTestCase extends RequiredByRoleBasic {
    *
    * All values have defaults, only need to specify values that need to be
    * different.
-   *
    */
   protected function createDateField($values = array(), $required_by_role_settings = array()) {
     extract($values);
+
+    $default_granularity = array('year', 'month', 'day', 'hour', 'minute');
 
     $field_name = !empty($field_name) ? $field_name : 'field_test';
     $entity_type = !empty($entity_type) ? $entity_type : 'node';
@@ -177,7 +178,7 @@ class RequiredByRoleDateFieldWebTestCase extends RequiredByRoleBasic {
     $todate = !empty($todate) ? $todate : 'optional';
     $widget_type = !empty($widget_type) ? $widget_type : 'date_select';
     $tz_handling = !empty($tz_handing) ? $tz_handling : 'site';
-    $granularity = !empty($granularity) ? $granularity : array('year', 'month', 'day', 'hour', 'minute');
+    $granularity = !empty($granularity) ? $granularity : $default_granularity;
     $year_range = !empty($year_range) ? $year_range : '2010:+1';
     $input_format = !empty($input_format) ? $input_format : date_default_format($widget_type);
     $input_format_custom = !empty($input_format_custom) ? $input_format_custom : '';
@@ -271,13 +272,13 @@ class RequiredByRoleDateFieldWebTestCase extends RequiredByRoleBasic {
     field_cache_clear(TRUE);
 
     // Look at how the field got configured.
-    $this->drupalGet("admin/structure/types/manage/$bundle/fields/$field_name");
-    $this->drupalGet("admin/structure/types/manage/$bundle/display");
+    // $this->drupalGet("admin/structure/types/manage/$bundle/fields/$field_name");
+    // $this->drupalGet("admin/structure/types/manage/$bundle/display");
 
   }
 
   /**
-   * @todo.
+   * Helper method to delete a date field.
    */
   protected function deleteDateField($label, $bundle = 'article', $bundle_name = 'Article') {
     $this->drupalGet("admin/structure/types/manage/$bundle/fields");

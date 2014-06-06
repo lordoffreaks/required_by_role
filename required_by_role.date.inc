@@ -11,15 +11,19 @@
  */
 function required_by_role_date_text_process_alter(&$element, &$form_state, $context) {
 
-  global $user;
+  if (isset($element['#field'])) {
 
-  $account = $user;
-  $settings = $element['#instance']['settings'];
-  $field = $element['#field'];
+    global $user;
 
-  $is_required = required_by_role_is_required($account, $settings, $field);
+    $account = $user;
+    $settings = $element['#instance']['settings'];
+    $field = $element['#field'];
 
-  $element['#required'] = $element['date']['#required'] = $is_required;
+    $is_required = required_by_role_is_required($account, $settings, $field);
+
+    $element['#required'] = $element['date']['#required'] = $is_required;
+
+  }
 
 }
 
@@ -29,17 +33,22 @@ function required_by_role_date_text_process_alter(&$element, &$form_state, $cont
  * This hook lets us make changes to the date_select widget.
  */
 function required_by_role_date_select_process_alter(&$element, &$form_state, $context) {
-  global $user;
 
-  $account = $user;
-  $settings = $element['#instance']['settings'];
-  $field = $element['#field'];
+  if (isset($element['#field'])) {
 
-  $is_required = required_by_role_is_required($account, $settings, $field);
-  $granularity = date_format_order($element['#date_format']);
+    global $user;
 
-  foreach ($granularity as $key) {
-    $element[$key]['#required'] = $is_required;
+    $account = $user;
+    $settings = $element['#instance']['settings'];
+    $field = $element['#field'];
+
+    $is_required = required_by_role_is_required($account, $settings, $field);
+    $granularity = date_format_order($element['#date_format']);
+
+    foreach ($granularity as $key) {
+      $element[$key]['#required'] = $is_required;
+    }
+
   }
 
 }
@@ -51,11 +60,11 @@ function required_by_role_date_select_process_alter(&$element, &$form_state, $co
  */
 function required_by_role_date_popup_process_alter(&$element, &$form_state, $context) {
 
-  global $user;
-
-  $account = $user;
-
   if (isset($element['#field'])) {
+
+    global $user;
+
+    $account = $user;
 
     $field = $element['#field'];
     $settings = $element['#instance']['settings'];

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Tests for Required by role module.
@@ -19,6 +18,9 @@ abstract class RequiredByRoleBasic extends DrupalWebTestCase {
   static $required_user = NULL;
   static $non_required_user = NULL;
 
+  /**
+   * Setup method.
+   */
   protected function setUp() {
 
     $this->basePermissions = array(
@@ -53,11 +55,14 @@ abstract class RequiredByRoleBasic extends DrupalWebTestCase {
     $this->required_fields_rid = $this->drupalCreateRole($this->basePermissions, 'Required fields role');
   }
 
-  protected function getRequiredUser(){
+  /**
+   * Helper method to ghet a required user.
+   */
+  protected function getRequiredUser() {
 
     $account = self::$required_user;
 
-    if(is_null($account)){
+    if (is_null($account)) {
 
       $account = $this->drupalCreateUser($this->basePermissions);
 
@@ -72,11 +77,14 @@ abstract class RequiredByRoleBasic extends DrupalWebTestCase {
     return $account;
   }
 
-  protected function getNonRequiredUser(){
+  /**
+   * Helper method to ghet a non-required user.
+   */
+  protected function getNonRequiredUser() {
 
     $account = self::$non_required_user;
 
-    if(is_null($account)){
+    if (is_null($account)) {
       $account = $this->drupalCreateUser($this->basePermissions);
       self::$non_required_user = $account;
     }

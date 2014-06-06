@@ -1,10 +1,18 @@
 <?php
 /**
+ * @file
+ * Callback tests.
+ */
+
+/**
  *
  * @see DrupalUnitTestCase
  */
 class RequiredByRoleCallbackAlterTestCase extends RequiredByRoleBasic {
 
+  /**
+   * GetInfo method.
+   */
   public static function getInfo() {
     return array(
       'name' => 'Required by role: hook_required_by_role_callback_alter',
@@ -14,11 +22,7 @@ class RequiredByRoleCallbackAlterTestCase extends RequiredByRoleBasic {
   }
 
   /**
-   * Call simpletest_example_empty_mysql_date and check that it returns correct
-   * result.
-   *
-   * Note that no environment is provided; we're just testing the correct
-   * behavior of a function when passed specific arguments.
+   * Test the default callback.
    */
   public function testDefaultCallback() {
 
@@ -29,15 +33,21 @@ class RequiredByRoleCallbackAlterTestCase extends RequiredByRoleBasic {
     $this->assertEqual($result, $callback, $message);
   }
 
-  function testContribModuleCallback(){
+  /**
+   * Test the hook_required_by_role_callback.
+   */
+  public function testContribModuleCallback() {
 
-    module_enable(array('required_by_role_test'));
+    module_enable(array('required_by_role_callback_test'), TRUE);
 
     $result = _required_by_role_get_callback();
-    $callback = 'required_by_role_test_required_callback';
+    $callback = 'required_by_role_callback_test_required_callback';
     $message = "The callback function should be $callback";
 
     $this->assertEqual($result, $callback, $message);
+
+    // Keep it disable to avoid set all fields mandatory.
+    module_disable(array('required_by_role_callback_test'), TRUE);
 
   }
 }
