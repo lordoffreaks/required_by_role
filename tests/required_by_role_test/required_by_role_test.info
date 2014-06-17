@@ -10,7 +10,11 @@ dependencies[] = email
 dependencies[] = image
 dependencies[] = required_by_role
 
-;Tests
+; Unit Tests
+files[] = RequiredByRoleBaseUnitTestCase.test
+files[] = RequiredByRoleUnitTestCase.test
+
+; Functional Tests
 files[] = RequiredByRoleBasic.test
 files[] = RequiredByRoleDateFieldWebTestCase.test
 files[] = RequiredByRoleEmailFieldWebTestCase.test

@@ -1,0 +1,74 @@
+<?php
+/**
+ * @file
+ * Unit test for the ByRole plugin.
+ */
+
+class RequiredByRoleUnitTestCase extends RequiredByRoleBaseUnitTestCase {
+
+  /**
+   * Instance of the plugin we want to test.
+   *
+   * @var object
+   */
+  protected $plugin = NULL;
+
+  /**
+   * GetInfo method.
+   */
+  public static function getInfo() {
+    return array(
+      'name' => 'By role',
+      'description' => 'Tests "By role" plugin.',
+      'group' => 'Required By Role',
+    );
+  }
+
+  /**
+   * Sets up unit test environment.
+   */
+  protected function setUp() {
+
+    parent::setUp();
+
+    module_load_include('php', 'required_by_role', 'plugins/required/RequiredByRole');
+    $this->plugin = new RequiredByRole();
+
+  }
+
+  /**
+   * Is a valid instance?.
+   */
+  public function testIsAValidInstance() {
+
+    $is_valid = !empty($this->plugin) && $this->plugin instanceof RequiredByRole;
+    $this->assertTrue($is_valid);
+  }
+
+  /**
+   * Is a valid instance?.
+   */
+  public function testEmptyRoles() {
+
+    $account = new stdClass();
+    $account->roles = array(
+      1 => 1,
+      2 => 2,
+    );
+
+    $context = array(
+      'instance' => array(
+        'settings' => array(
+          'required_plugin_options' => array(),
+        ),
+      ),
+    );
+
+    $this->plugin->setContexts($account, $context);
+
+    $required = $this->plugin->isRequired();
+    $expected = FALSE;
+
+    $this->assertEqual($required, $expected);
+  }
+}

@@ -6,6 +6,10 @@ dependencies[] = ctools
 
 files[] = required_by_role.date.inc
 
-; Base required class.
+; Base required classes.
 files[] = RequiredPlugin.php
 files[] = RequiredInterface.php
+
+; Plugins.
+files[] = plugins/required/RequiredByRole.php
+files[] = plugins/required/RequiredCore.php

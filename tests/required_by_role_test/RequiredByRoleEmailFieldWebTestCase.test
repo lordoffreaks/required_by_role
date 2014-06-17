@@ -22,9 +22,13 @@ class RequiredByRoleEmailFieldWebTestCase extends RequiredByRoleBasic {
    */
   protected function setUp() {
 
-    parent::setUp('email');
+    $modules = array(
+      'email',
+    );
 
-    $rid = (int) $this->required_fields_rid;
+    $modules = $this->common_modules + $modules;
+
+    parent::setUp($modules);
     $settings = array();
 
     // Create test user.

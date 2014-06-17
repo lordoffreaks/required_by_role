@@ -22,7 +22,13 @@ class RequiredByRoleImageFieldWebTestCase extends RequiredByRoleBasic {
    */
   public function setUp() {
 
-    parent::setUp('image');
+    $modules = array(
+      'image',
+    );
+
+    $modules = $this->common_modules + $modules;
+
+    parent::setUp($modules);
 
     $rid = $this->required_fields_rid;
 

@@ -9,6 +9,8 @@
  */
 abstract class RequiredByRoleBasic extends DrupalWebTestCase {
 
+  protected $common_modules = array();
+
   protected $entity_type = 'node';
   protected $entity_bundle = 'article';
 
@@ -35,13 +37,12 @@ abstract class RequiredByRoleBasic extends DrupalWebTestCase {
       'access administration pages',
     );
 
-    $modules = array();
-    $modules[] = 'field';
-    $modules[] = 'field_ui';
-    $modules[] = 'required_by_role';
-    $modules[] = 'required_by_role_test';
+    $this->common_modules[] = 'field';
+    $this->common_modules[] = 'field_ui';
+    $this->common_modules[] = 'required_by_role';
+    $this->common_modules[] = 'required_by_role_test';
 
-    parent::setUp($modules);
+    parent::setUp($this->common_modules);
 
     // Create Basic page and Article node types.
     if ($this->profile != 'standard') {

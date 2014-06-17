@@ -1,0 +1,19 @@
+<?php
+/**
+ * @file
+ * Unit test for the ByRole plugin.
+ */
+
+abstract class RequiredByRoleBaseUnitTestCase extends DrupalUnitTestCase {
+
+  /**
+   * Sets up unit test environment.
+   */
+  protected function setUp() {
+
+    parent::setUp();
+
+    module_load_include('php', 'required_by_role', 'RequiredInterface');
+    module_load_include('php', 'required_by_role', 'RequiredPlugin');
+  }
+}

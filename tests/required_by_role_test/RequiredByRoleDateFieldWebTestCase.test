@@ -22,20 +22,16 @@ class RequiredByRoleDateFieldWebTestCase extends RequiredByRoleBasic {
    */
   protected function setUp() {
 
-    // Load the date_api module.
-    parent::setUp();
     $modules = array(
-      'field',
-      'field_ui',
       'date_api',
       'date',
       'date_popup',
       'date_tools',
-      'required_by_role',
-      'required_by_role_test',
     );
 
-    module_enable($modules);
+    $modules = $this->common_modules + $modules;
+
+    parent::setUp($modules);
 
     variable_set('date_popup_timepicker', 'none');
 
