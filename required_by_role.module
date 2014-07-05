@@ -49,7 +49,7 @@ function required_by_role_field_widget_form_alter(&$element, &$form_state, $cont
     $is_required = required_by_role_is_required($account, $settings, $field);
 
     // Recreating the whole element.
-    // We need to do that because the hook_field_widget_form_alter acts late in
+    // We need to do this because the hook_field_widget_form_alter acts later in
     // field_default_form and the element is already created, so the property
     // is not propagated.
     _required_by_role_recreate_element($element, $form_state, $context, $is_required);
