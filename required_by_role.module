@@ -43,10 +43,9 @@ function required_by_role_field_widget_form_alter(&$element, &$form_state, $cont
 
     $account = $user;
     $settings = $context['instance']['settings'];
-    $field = $context['field'];
 
     // Getting the value based on our rules.
-    $is_required = required_by_role_is_required($account, $settings, $field);
+    $is_required = required_by_role_is_required($account, $settings, $context, $form_state);
 
     // Recreating the whole element.
     // We need to do this because the hook_field_widget_form_alter acts later in
@@ -121,7 +120,7 @@ function _required_by_role_recreate_element(&$element, &$form_state, $context, $
 /**
  * Central method to figure out if the fields should be required or not based on the current callback.
  */
-function required_by_role_is_required($account, $settings, $field) {
+function required_by_role_is_required($account, $settings, $context, $form_state) {
 
   $is_required = NULL;
 
@@ -130,7 +129,7 @@ function required_by_role_is_required($account, $settings, $field) {
   $required_callback = _required_by_role_get_callback();
 
   if (is_callable($required_callback)) {
-    $is_required = $required_callback($account, $roles, $field);
+    $is_required = $required_callback($account, $roles, $context, $form_state);
   }
 
   return $is_required;
@@ -161,7 +160,7 @@ function required_by_role_required_by_role_callback() {
 /**
  * At least one of $roles values is in the $account->roles array?.
  */
-function _required_by_role_roles_intersect($account, $roles, $field) {
+function _required_by_role_roles_intersect($account, $roles, $context, $form_state) {
 
   $match = array_intersect(array_keys($account->roles), $roles);
   $is_required = !empty($match);

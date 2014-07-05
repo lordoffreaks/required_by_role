@@ -14,6 +14,6 @@ function required_by_role_callback_test_required_by_role_callback_alter(&$callba
 /**
  * Test callback for hook_required_by_role_callback_alter.
  */
-function required_by_role_callback_test_required_callback($account, $roles, $field) {
+function required_by_role_callback_test_required_callback($account, $roles, $context, $form_state) {
   return TRUE;
 }
