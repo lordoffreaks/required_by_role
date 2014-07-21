@@ -9,20 +9,10 @@ class RequiredCore extends RequiredPlugin {
   /**
    * IsRequired method implementation.
    */
-  public function isRequired() {
+  public function isRequired($context) {
 
-    $this->setConfiguration();
-    $settings = $this->context['instance']['settings'];
-
-    return $this->delta == 0 && $settings['required_plugin_options'];
-  }
-
-  /**
-   * Helper method.
-   */
-  protected function setConfiguration() {
-    $this->delta = $this->context['element']['#delta'];
-    $this->instance = $this->context['instance'];;
+    $settings = $this->getSettings();
+    return $this->context['delta'] == 0 && $settings['required_plugin_options'];
   }
 
   /**

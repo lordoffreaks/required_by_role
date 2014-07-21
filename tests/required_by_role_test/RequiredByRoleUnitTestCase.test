@@ -46,27 +46,20 @@ class RequiredByRoleUnitTestCase extends RequiredByRoleBaseUnitTestCase {
   }
 
   /**
-   * Is a valid instance?.
+   * Test empty roles.
    */
   public function testEmptyRoles() {
 
-    $account = new stdClass();
-    $account->roles = array(
-      1 => 1,
-      2 => 2,
-    );
-
-    $context = array(
+    $contexts = array(
       'instance' => array(
         'settings' => array(
           'required_plugin_options' => array(),
         ),
       ),
+      'account' => drupal_anonymous_user(),
     );
 
-    $this->plugin->setContexts($account, $context);
-
-    $required = $this->plugin->isRequired();
+    $required = $this->plugin->isRequired($contexts);
     $expected = FALSE;
 
     $this->assertEqual($required, $expected);

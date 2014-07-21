@@ -9,6 +9,6 @@ interface RequiredInterface {
   /**
    * Core function, determines wether or not a field is required.
    */
-  public function isRequired();
+  public function isRequired($context);
 
 }

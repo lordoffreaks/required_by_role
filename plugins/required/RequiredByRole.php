@@ -12,7 +12,9 @@ class RequiredByRole extends RequiredPlugin {
   /**
    * IsRequired method implementation.
    */
-  public function isRequired() {
+  public function isRequired($context) {
+
+    $this->context = $context;
 
     $this->setConfiguration();
 
@@ -88,8 +90,9 @@ class RequiredByRole extends RequiredPlugin {
   protected function setConfiguration() {
 
     $settings = $this->getSettings();
+    $account = $this->getAccount();
 
-    $this->setUserRoles($this->account->roles);
+    $this->setUserRoles($account->roles);
     $this->setRequiredRoles($settings['required_plugin_options']);
 
   }

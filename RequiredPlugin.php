@@ -7,22 +7,6 @@
 abstract class RequiredPlugin implements RequiredInterface {
 
   protected $context;
-  protected $account;
-
-  /**
-   * Save arguments locally.
-   */
-  public function setContexts($account, $context) {
-    $this->context = $context;
-    $this->account  = $account;
-
-    return $this;
-  }
-
-  /**
-   * Core function, determines wether or not a field widget is required.
-   */
-  public function isRequired() {}
 
   /**
    * Provides a form element to configure the plugin options.
@@ -50,13 +34,14 @@ abstract class RequiredPlugin implements RequiredInterface {
   /**
    * Helper function to get the plugin settings.
    */
-  protected function getSettings() {
-    return $this->context['instance']['settings'];
+  protected function getAccount() {
+    return $this->context['account'];
   }
 
   /**
-   * Helper function to set the configuration.
+   * Helper function to get the plugin settings.
    */
-  protected function setConfiguration() {}
-
+  protected function getSettings() {
+    return $this->context['instance']['settings'];
+  }
 }

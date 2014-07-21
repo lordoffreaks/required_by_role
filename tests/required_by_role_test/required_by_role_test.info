@@ -16,6 +16,4 @@ files[] = RequiredByRoleUnitTestCase.test
 
 ; Functional Tests
 files[] = RequiredByRoleBasic.test
-files[] = RequiredByRoleDateFieldWebTestCase.test
-files[] = RequiredByRoleEmailFieldWebTestCase.test
-files[] = RequiredByRoleImageFieldWebTestCase.test
+files[] = RequiredByRoleCommonWebTestCase.test
