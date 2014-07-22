@@ -64,11 +64,7 @@ function required_by_role_field_widget_form_alter(&$element, &$form_state, $cont
  *
  * Mostly copied from field_default_form in field.form.inc file.
  */
-function _required_by_role_recreate_element(&$element, &$form_state, $context, $is_required) {
-
-  $get_delta = $context['delta'];
-
-  $is_required = $is_required !== NULL ? $is_required : $instance['required'];
+function _required_by_role_recreate_element(&$element, &$form_state, $context, $is_required, $get_delta = NULL) {
 
   $field_name = $context['field']['field_name'];
   $instance = $context['instance'];
@@ -77,10 +73,11 @@ function _required_by_role_recreate_element(&$element, &$form_state, $context, $
   $items = $context['items'];
   $form = $context['form'];
   $entity = isset($context['form']['#entity']) ? $context['form']['#entity'] : NULL;
+  $entity_type = $context['instance']['entity_type'];
   $parents = $context['form']['#parents'];
 
   // Important to set here to be inherited by the children.
-  $instance['required'] = $is_required;
+  $instance['required'] = $is_required !== NULL ? $is_required : $instance['required'];
 
   // If field module handles multiple values for this form element, and we are
   // displaying an individual element, process the multiple value form.
@@ -88,6 +85,8 @@ function _required_by_role_recreate_element(&$element, &$form_state, $context, $
     // Store the entity in the form.
     $form['#entity'] = $entity;
     $elements = field_multiple_value_form($field, $instance, $langcode, $items, $form, $form_state);
+    $element = $elements[$context['delta']];
+
   }
   // If the widget is handling multiple values (e.g Options), or if we are
   // displaying an individual element, just get a single form element and make
@@ -107,7 +106,7 @@ function _required_by_role_recreate_element(&$element, &$form_state, $context, $
         '#title' => check_plain($instance['label']),
         '#description' => field_filter_xss($instance['description']),
         // Only the first widget should be required.
-        '#required' => $delta == 0 && $is_required,
+        '#required' => $delta == 0 && $instance['required'],
         '#delta' => $delta,
       );
 
@@ -223,6 +222,9 @@ function required_by_role_form_field_ui_field_edit_form_alter(&$form, $form_stat
 
   if (isset($default_value_widget[0]['#required'])) {
     $default_value_widget[0]['#required'] = FALSE;
+  }
+  elseif (isset($default_value_widget[0]['value']['#required'])) {
+    $default_value_widget[0]['value']['#required'] = FALSE;
   }
   else {
     $default_value_widget['#required'] = FALSE;
