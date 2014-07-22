@@ -6,8 +6,15 @@
 
 class RequiredByRoleEmailFieldWebTestCase extends RequiredByRoleBasic {
 
+  /**
+   * Label of the test field.
+   * @var string
+   */
   protected $field_label = 'Email';
 
+  /**
+   * Getinfo method.
+   */
   public static function getInfo() {
     return array(
       'name' => 'Required by role: Email',
@@ -16,28 +23,29 @@ class RequiredByRoleEmailFieldWebTestCase extends RequiredByRoleBasic {
     );
   }
 
+  /**
+   * Setup method.
+   */
   protected function setUp() {
 
-    parent::setUp();
-    module_enable(array('email'));
+    parent::setUp('field', 'field_ui', 'required_by_role', 'email');
 
-    $rid = (int)$this->required_fields_rid;
+    $rid = (int) $this->required_fields_rid;
 
     $settings = array(
       "instance[settings][required_by_role][$rid]" => $rid,
     );
+
+    $this->drupalLogin($this->getRequiredUser());
 
     $this->createEmailField(NULL, $settings);
 
   }
 
   /**
-   * Test for both required and non-required roles
-   * @return [type] [description]
+   * Test for both required and non-required roles.
    */
-  public function testRequiredByRole(){
-
-    $this->drupalLogin($this->getRequiredUser());
+  public function testRequiredByRole() {
 
     $edit = array();
     $edit['title'] = $this->randomName(8);
@@ -53,12 +61,12 @@ class RequiredByRoleEmailFieldWebTestCase extends RequiredByRoleBasic {
     $this->drupalPost('node/add/' . $this->entity_bundle, $edit, t('Save'));
     $this->assertText($edit['title'], "Node has been created");
 
-    $this->drupalLogout();
   }
 
+  /**
+   * Helper function to create an email field.
+   */
   protected function createEmailField($bundle = NULL, $settings = array()) {
-
-    $this->drupalLogin($this->getRequiredUser());
 
     $node_type = $bundle ? $bundle : $this->entity_bundle;
 
@@ -72,9 +80,9 @@ class RequiredByRoleEmailFieldWebTestCase extends RequiredByRoleBasic {
       'fields[_add_new_field][widget_type]' => 'email_textfield',
     );
 
-    $field_name = 'field_'. $name;
+    $field_name = 'field_' . $name;
 
-    $this->drupalPost('admin/structure/types/manage/'. $node_type .'/fields', $edit, t('Save'));
+    $this->drupalPost('admin/structure/types/manage/' . $node_type . '/fields', $edit, t('Save'));
     $this->drupalPost(NULL, array(), t('Save field settings'));
     $this->drupalPost(NULL, $settings, t('Save settings'));
 
@@ -82,8 +90,6 @@ class RequiredByRoleEmailFieldWebTestCase extends RequiredByRoleBasic {
     $this->assertRaw(t('Saved %label configuration', array('%label' => $label)), 'Field added');
     node_types_rebuild();
     menu_rebuild();
-
-    $this->drupalLogout();
 
     return $field_name;
   }

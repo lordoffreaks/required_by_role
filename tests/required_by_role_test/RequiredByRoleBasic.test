@@ -35,13 +35,7 @@ abstract class RequiredByRoleBasic extends DrupalWebTestCase {
       'access administration pages',
     );
 
-    $modules = array();
-    $modules[] = 'field';
-    $modules[] = 'field_ui';
-    $modules[] = 'required_by_role';
-    $modules[] = 'required_by_role_test';
-
-    parent::setUp($modules);
+    parent::setUp('field', 'field_ui', 'required_by_role', 'required_by_role_test');
 
     // Create Basic page and Article node types.
     if ($this->profile != 'standard') {
