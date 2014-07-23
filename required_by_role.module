@@ -213,12 +213,13 @@ function required_by_role_field_multiple_value_form($field, $instance, $langcode
       );
       // Add 'add more' button, if not working with a programmed form.
       if ($field['cardinality'] == FIELD_CARDINALITY_UNLIMITED && empty($form_state['programmed'])) {
+        $verrors = array(array_merge($parents, array($field_name, $langcode)));
         $field_elements['add_more'] = array(
           '#type' => 'submit',
           '#name' => strtr($id_prefix, '-', '_') . '_add_more',
           '#value' => t('Add another item'),
           '#attributes' => array('class' => array('field-add-more-submit')),
-          '#limit_validation_errors' => array(array_merge($parents, array($field_name, $langcode))),
+          '#limit_validation_errors' => $verrors,
           '#submit' => array('field_add_more_submit'),
           '#ajax' => array(
             'callback' => 'field_add_more_js',
@@ -324,7 +325,6 @@ function required_by_role_form_field_ui_field_edit_form_alter(&$form, $form_stat
     '#options' => $options,
     '#default_value' => $required_by_role,
     '#weight' => $form['instance']['required']['#weight'] + 1,
-    '#disabled' => $form['instance']['required']['#default_value'],
     '#attached' => $attached,
     '#empty' => t('No roles available.'),
     '#attributes' => array(
