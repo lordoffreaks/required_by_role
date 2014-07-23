@@ -1,0 +1,137 @@
+<?php
+/**
+ * @file
+ * Tests for the common cases.
+ */
+
+class RequiredByRoleCommonWebTestCase extends RequiredByRoleBasic {
+
+  /**
+   * Field name.
+   */
+  protected $fieldName = NULL;
+
+  /**
+   * Field label.
+   */
+  protected $fieldLabel = NULL;
+
+  /**
+   * Getinfo method.
+   */
+  public static function getInfo() {
+    return array(
+      'name' => 'Required by role: Common',
+      'description' => 'Tests for common behaviors.',
+      'group' => 'Required by role',
+    );
+  }
+
+  /**
+   * Setup method.
+   */
+  protected function setUp() {
+
+    parent::setUp('field', 'field_ui', 'required_by_role');
+
+    $rid = (int) $this->required_fields_rid;
+
+    $settings = array(
+      "instance[settings][required_by_role][$rid]" => $rid,
+    );
+
+    $this->drupalLogin($this->getRequiredUser());
+
+    $this->setFieldLabel($this->randomName(4));
+    $this->setFieldName('text_test');
+
+    $this->createTextField(NULL, $settings);
+
+  }
+
+  /**
+   * Helper function to set the field name.
+   */
+  protected function setFieldName($value) {
+    $this->fieldName = $value . '_' .  strtolower($this->getFieldLabel());
+  }
+
+  /**
+   * Helper function to set the field name.
+   */
+  protected function setFieldLabel($value) {
+    $this->fieldLabel = $value;
+  }
+
+  /**
+   * Helper function to get the field name.
+   */
+  protected function getFieldName() {
+    return $this->fieldName;
+  }
+
+  /**
+   * Helper function to get the field machine name.
+   */
+  protected function getFieldMachineName() {
+    return 'field_' . $this->getFieldName();
+  }
+
+  /**
+   * Helper function to get the field name.
+   */
+  protected function getFieldLabel() {
+    return $this->fieldLabel;
+  }
+
+  /**
+   * Helper function to create an email field.
+   */
+  protected function createTextField($bundle = NULL, $settings = array()) {
+
+    $node_type = $bundle ? $bundle : $this->entity_bundle;
+
+    $label = $this->getFieldLabel();
+    $name  = $this->getFieldName();
+
+    $edit = array(
+      'fields[_add_new_field][label]' => $label,
+      'fields[_add_new_field][field_name]' => $name,
+      'fields[_add_new_field][type]' => 'text',
+      'fields[_add_new_field][widget_type]' => 'text_textfield',
+    );
+
+    $field_name = $this->getFieldMachineName();
+
+    $this->drupalPost('admin/structure/types/manage/' . $node_type . '/fields', $edit, t('Save'));
+    $this->drupalPost(NULL, array(), t('Save field settings'));
+    $this->drupalPost(NULL, $settings, t('Save settings'));
+
+    // Is field created?
+    $this->assertRaw(t('Saved %label configuration', array('%label' => $label)), 'Field added');
+    node_types_rebuild();
+    menu_rebuild();
+
+    return $field_name;
+  }
+
+  /**
+   * Check if the default_value_widget is always NOT required.
+   */
+  public function testDefaultValueIsNotRequired() {
+
+    $field_name = $this->getFieldMachineName();
+    $label = $this->getFieldLabel();
+
+    $edit = array();
+    $this->drupalPost('admin/structure/types/manage/' . $this->entity_bundle . '/fields/' . $field_name, $edit, t('Save settings'));
+
+    // We shouldn´t get a field mandatory error message.
+    $expected_error = t('@label field is required.', array('@label' => $label));
+    $this->assertNoText($expected_error, 'Default value widget is not required.');
+
+    // We should get a success message.
+    $expected_success = t('Saved @label configuration.', array('@label' => $label));
+    $this->assertText($expected_success, 'Default value widget is not required.');
+  }
+}

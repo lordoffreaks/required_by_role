@@ -10,8 +10,15 @@ dependencies[] = email
 dependencies[] = required_by_role
 
 ;Tests
+
+; Base test.
 files[] = RequiredByRoleBasic.test
+
+; Common functionality and hooks.
+files[] = RequiredByRoleCommonWebTestCase.test
 files[] = RequiredByRoleCallbackAlterTestCase.test
+
+; Field specific tests.
 files[] = RequiredByRoleDateFieldWebTestCase.test
 files[] = RequiredByRoleEmailFieldWebTestCase.test
 files[] = RequiredByRoleImageFieldWebTestCase.test

@@ -340,11 +340,12 @@ function required_by_role_form_field_ui_field_edit_form_alter(&$form, $form_stat
   if (isset($default_value_widget[0]['#required'])) {
     $default_value_widget[0]['#required'] = FALSE;
   }
-  elseif (isset($default_value_widget[0]['value']['#required'])) {
-    $default_value_widget[0]['value']['#required'] = FALSE;
-  }
   else {
     $default_value_widget['#required'] = FALSE;
+  }
+
+  if (isset($default_value_widget[0]['value']['#required'])) {
+    $default_value_widget[0]['value']['#required'] = FALSE;
   }
 
 }
