@@ -116,9 +116,53 @@ class RequiredByRoleCommonWebTestCase extends RequiredByRoleBasic {
   }
 
   /**
+   * Helper function to set the required property.
+   */
+  protected function setFieldRequiredProperty($settings) {
+
+    $node_type = $this->entity_bundle;
+
+    $url = "admin/structure/types/manage/" . $node_type . "/fields/" . $this->getFieldMachineName();
+    $this->drupalPost($url, $settings, t('Save settings'));
+
+  }
+
+  /**
+   * Helper function check the settings.
+   */
+  protected function checkFieldRequiredProperty($ids) {
+
+    $node_type = $this->entity_bundle;
+
+    $url = "admin/structure/types/manage/" . $node_type . "/fields/" . $this->getFieldMachineName();
+    $this->drupalGet($url);
+
+    foreach ($ids as $id => $active) {
+      if ($active) {
+        $this->assertFieldChecked($id);
+      }
+      else {
+        $this->assertNoFieldChecked($id);
+      }
+    }
+
+  }
+
+  /**
+   * Group the tests for better performance.
+   */
+  public function testCommonBehaviors() {
+
+    $this->DotestDefaultValueIsNotRequired();
+    $this->DotestChangeToDefaultBehavior();
+    $this->DotestChangeToRequiredByRole();
+
+  }
+
+  /**
    * Check if the default_value_widget is always NOT required.
    */
-  public function testDefaultValueIsNotRequired() {
+  public function DotestDefaultValueIsNotRequired() {
 
     $field_name = $this->getFieldMachineName();
     $label = $this->getFieldLabel();
@@ -133,5 +177,51 @@ class RequiredByRoleCommonWebTestCase extends RequiredByRoleBasic {
     // We should get a success message.
     $expected_success = t('Saved @label configuration.', array('@label' => $label));
     $this->assertText($expected_success, 'Default value widget is not required.');
+  }
+
+  /**
+   * Test changing the required property to the default behavior.
+   */
+  public function DotestChangeToDefaultBehavior() {
+
+    $rid = (int) $this->required_fields_rid;
+
+    $settings = array(
+      "instance[required]" => 1,
+      "instance[settings][required_by_role][$rid]" => FALSE,
+    );
+
+    $this->setFieldRequiredProperty($settings);
+
+    $ids = array(
+      'edit-instance-required' => 1,
+      'edit-instance-settings-required-by-role-' . $rid => 0,
+    );
+
+    $this->checkFieldRequiredProperty($ids);
+
+  }
+
+  /**
+   * Test changing the required property to required by role.
+   */
+  public function DotestChangeToRequiredByRole() {
+
+    $rid = (int) $this->required_fields_rid;
+
+    $settings = array(
+      "instance[required]" => FALSE,
+      "instance[settings][required_by_role][$rid]" => $rid,
+    );
+
+    $this->setFieldRequiredProperty($settings);
+
+    $ids = array(
+      'edit-instance-settings-required-by-role-' . $rid => 1,
+      'edit-instance-required' => 0,
+    );
+
+    $this->checkFieldRequiredProperty($ids);
+
   }
 }

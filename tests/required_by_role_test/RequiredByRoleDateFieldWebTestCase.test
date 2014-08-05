@@ -33,9 +33,18 @@ class RequiredByRoleDateFieldWebTestCase extends RequiredByRoleBasic {
   }
 
   /**
+   * Grouping testing method.
+   */
+  public function testDoTests() {
+    $this->DotestDatePopupElementForm();
+    $this->DotestRequiredRole();
+    $this->DotestIsNonRequiredRole();
+  }
+
+  /**
    * Testing date_popup element in a non field form.
    */
-  public function testDatePopupElementForm() {
+  public function DotestDatePopupElementForm() {
     $this->drupalGet('form-date-element-test');
     $this->assertNoText('Notice: Undefined index: #instance in required_by_role_', "No undefined index error found.");
   }
@@ -49,7 +58,7 @@ class RequiredByRoleDateFieldWebTestCase extends RequiredByRoleBasic {
    * @todo Test with todate optional value
    * @todo Test with todate required value
    */
-  public function testRequiredRole() {
+  public function DotestRequiredRole() {
 
     $this->drupalLogin($this->getRequiredUser());
 
@@ -108,13 +117,13 @@ class RequiredByRoleDateFieldWebTestCase extends RequiredByRoleBasic {
   /**
    * Test for non-required role.
    */
-  public function testIsNonRequiredRole() {
+  public function DotestIsNonRequiredRole() {
+
+    $this->drupalLogin($this->getNonRequiredUser());
 
     $edit = array();
     $edit['title'] = $this->randomName(8);
     $edit['body[und][0][value]'] = $this->randomName(16);
-
-    $this->drupalLogin($this->getNonRequiredUser());
 
     $rid = (int) $this->required_fields_rid;
 

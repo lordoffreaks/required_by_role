@@ -193,7 +193,7 @@ function required_by_role_form_field_ui_field_edit_form_alter(&$form, $form_stat
     '#attached' => $attached,
     '#empty' => t('No roles available.'),
     '#attributes' => array(
-      'id' => array('tableselect-required-by-role'),
+      'class' => array('tableselect-required-by-role'),
     ),
   );
 
