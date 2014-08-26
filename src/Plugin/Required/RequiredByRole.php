@@ -36,7 +36,7 @@ class RequiredByRole extends RequiredBase {
    */
   public function isRequired(FieldDefinitionInterface $field, AccountInterface $account) {
 
-    $is_required = $this->getMatches($account->getRoles(), $field->required);
+    $is_required = $this->getMatches($account->getRoles(), $field->getSetting('required_plugin_options'));
     return $is_required;
   }
 
@@ -74,7 +74,7 @@ class RequiredByRole extends RequiredBase {
   public function requiredFormElement(FieldDefinitionInterface $field) {
 
     $roles = user_roles();
-    $default_value = isset($field->required) && is_array($field->required) ? $field->required : array();
+    $default_value = $field->getSetting('required_plugin_options') ?: array();
 
     unset($roles[DRUPAL_AUTHENTICATED_RID]);
 
