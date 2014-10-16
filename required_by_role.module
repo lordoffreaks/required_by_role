@@ -70,29 +70,26 @@ function _required_by_role_set_property(&$element, $is_required, $context) {
 
   if ($context['delta'] === 0) {
 
-    // "Normal" widgets.
     if (isset($element['#required'])) {
-      $element['#required'] = $is_required;
+      // "Normal" widgets.
+    } elseif (isset($element[0]['#required'])) {
+      // 0 based widgets.
+      $element = &$element[0];
+    } elseif (isset($element['value']['#required'])) {
+      // "Value" based widgets.
+      $element = &$element['value'];
+    } elseif (isset($element[0]['value']['#required'])) {
+      // "[0][value]" based widgets.
+      $element = &$element[0]['value'];
+    } elseif (isset($element['email']['#required'])) {
+      // "[email]" based widgets.
+      $element = &$element['email'];
     }
 
-    // 0 based widgets.
-    if (isset($element[0]['#required'])) {
-      $element[0]['#required'] = $is_required;
-    }
+    $element['#required'] = $is_required;
 
-    // "Value" based widgets.
-    if (isset($element['value']['#required'])) {
-      $element['value']['#required'] = $is_required;
-    }
-
-    // "[0][value]" based widgets.
-    if (isset($element[0]['value']['#required'])) {
-      $element[0]['value']['#required'] = $is_required;
-    }
-
-    // "[0][value]" based widgets.
-    if (isset($element['email']['#required'])) {
-      $element['email']['#required'] = $is_required;
+    if ($is_required && isset($element['#options']['_none'])) {
+      unset($element['#options']['_none']);
     }
 
   }
