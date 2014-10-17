@@ -16,6 +16,12 @@ class RequiredByRoleCommonWebTestCase extends RequiredByRoleBasic {
    */
   protected $fieldLabel = NULL;
 
+
+  /**
+   * Field label.
+   */
+  protected $optionsFieldCardinality = 0;
+
   /**
    * Getinfo method.
    */
@@ -32,7 +38,7 @@ class RequiredByRoleCommonWebTestCase extends RequiredByRoleBasic {
    */
   protected function setUp() {
 
-    parent::setUp('field', 'field_ui', 'required_by_role');
+    parent::setUp();
 
     $rid = (int) $this->required_fields_rid;
 
@@ -46,6 +52,7 @@ class RequiredByRoleCommonWebTestCase extends RequiredByRoleBasic {
     $this->setFieldName('text_test');
 
     $this->createTextField(NULL, $settings);
+    $this->createOptionsField();
 
   }
 
@@ -115,6 +122,41 @@ class RequiredByRoleCommonWebTestCase extends RequiredByRoleBasic {
     return $field_name;
   }
 
+  protected function createOptionsField($bundle = NULL) {
+
+    $node_type = $bundle ? $bundle : $this->entity_bundle;
+
+    // Field with cardinality 0.
+    $this->options_field = array(
+      'field_name' => 'options_field',
+      'type' => 'list_integer',
+      'cardinality' => $this->optionsFieldCardinality,
+      'settings' => array(
+        'allowed_values' => array(1 => 'One', 2 => 'Two'),
+      ),
+    );
+    $this->options_field = field_create_field($this->options_field);
+
+    $rid = (int) $this->required_fields_rid;
+
+    // Create an instance of the 'single value' field.
+    $instance = array(
+      'field_name' => $this->options_field['field_name'],
+      'entity_type' => $this->entity_type,
+      'bundle' => $node_type,
+      'settings' => array(
+        'required_by_role' => array(
+          $rid => $rid,
+        ),
+      ),
+      'widget' => array(
+        'type' => 'options_select',
+      ),
+    );
+
+    $instance = field_create_instance($instance);
+  }
+
   /**
    * Helper function to set the required property.
    */
@@ -154,6 +196,7 @@ class RequiredByRoleCommonWebTestCase extends RequiredByRoleBasic {
   public function testCommonBehaviors() {
 
     $this->DotestDefaultValueIsNotRequired();
+    $this->DotestNoneRemovedInOptionsWhenFieldIsRequired();
     $this->DotestChangeToDefaultBehavior();
     $this->DotestChangeToRequiredByRole();
 
@@ -177,6 +220,32 @@ class RequiredByRoleCommonWebTestCase extends RequiredByRoleBasic {
     // We should get a success message.
     $expected_success = t('Saved @label configuration.', array('@label' => $label));
     $this->assertText($expected_success, 'Default value widget is not required.');
+  }
+
+
+  /**
+   * Checks that the _none option is not present in options fields when the
+   * field is required_by_role.
+   */
+  public function DotestNoneRemovedInOptionsWhenFieldIsRequired() {
+
+    // Display form.
+    $this->drupalGet('node/add/' . $this->entity_bundle);
+    $langcode = LANGUAGE_NONE;
+
+    $xpath = '//select[@id=:id]//option[@value="_none" and text()=:label]';
+
+    $id = 'edit-options_field-' . $langcode . '-' . $this->optionsFieldCardinality;
+    $arguments = array(
+      ':id' => $id,
+      ':label' => t('- Select a value -'),
+    );
+
+    $message = 'A required select list shouldn´t have a "Select a value" choice.';
+
+    // A required field shouldn't has a "none" option.
+    $this->assertFalse($this->xpath($xpath, $arguments), $message);
+
   }
 
   /**
