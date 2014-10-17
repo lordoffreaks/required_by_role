@@ -28,7 +28,7 @@ class RequiredByRoleEmailFieldWebTestCase extends RequiredByRoleBasic {
    */
   protected function setUp() {
 
-    parent::setUp('field', 'field_ui', 'required_by_role', 'email');
+    parent::setUp('field_ui', 'required_by_role', 'email');
 
     $rid = (int) $this->required_fields_rid;
 

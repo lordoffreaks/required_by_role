@@ -70,19 +70,23 @@ function _required_by_role_set_property(&$element, $is_required, $context) {
 
   if ($context['delta'] === 0) {
 
-    if (isset($element['#required'])) {
-      // "Normal" widgets.
-    } elseif (isset($element[0]['#required'])) {
-      // 0 based widgets.
+    // 0 based widgets.
+    if (isset($element[0]['#required'])) {
       $element = &$element[0];
-    } elseif (isset($element['value']['#required'])) {
-      // "Value" based widgets.
+    }
+
+    // "Value" based widgets.
+    if (isset($element['value']['#required'])) {
       $element = &$element['value'];
-    } elseif (isset($element[0]['value']['#required'])) {
-      // "[0][value]" based widgets.
+    }
+
+    // "[0][value]" based widgets.
+    if (isset($element[0]['value']['#required'])) {
       $element = &$element[0]['value'];
-    } elseif (isset($element['email']['#required'])) {
-      // "[email]" based widgets.
+    }
+
+    // "[email]" based widgets.
+    if (isset($element['email']['#required'])) {
       $element = &$element['email'];
     }
 
@@ -91,7 +95,6 @@ function _required_by_role_set_property(&$element, $is_required, $context) {
     if ($is_required && isset($element['#options']['_none'])) {
       unset($element['#options']['_none']);
     }
-
   }
 
 }
