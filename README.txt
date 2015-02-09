@@ -10,3 +10,5 @@ INSTALLATION:
 directory. The asterisk represents either all or one of your multisite
 folders
 2. Navigate to the administer > modules page and enable the module.
+
+Join the chat at https://gitter.im/lordoffreaks/required_by_role
