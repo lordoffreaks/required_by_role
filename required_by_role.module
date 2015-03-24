@@ -55,7 +55,7 @@ function required_by_role_field_widget_form_alter(&$element, &$form_state, $cont
     // is not allowing us to modify the $context property and after is late to
     // act on a non "deployed" element.
     //
-    _required_by_role_set_property($element, $is_required, $context);
+    _required_by_role_set_property($element, $is_required, $context, $form_state);
 
     // Give the opportunity to other modules to act on this property.
     drupal_alter('required_property', $element, $field, $is_required);
@@ -65,8 +65,10 @@ function required_by_role_field_widget_form_alter(&$element, &$form_state, $cont
 
 /**
  * Helper function to set the #required property to a given element.
+ *
+ * @see form_builder
  */
-function _required_by_role_set_property(&$element, $is_required, $context) {
+function _required_by_role_set_property(&$element, $is_required, $context, $form_state) {
 
   if ($context['delta'] === 0) {
 
@@ -92,8 +94,14 @@ function _required_by_role_set_property(&$element, $is_required, $context) {
 
     $element['#required'] = $is_required;
 
-    if ($is_required && isset($element['#options']['_none'])) {
-      unset($element['#options']['_none']);
+    $info = element_info($element['#type']);
+
+    // Reprocess the element as in form_builder.
+    if (isset($info['#process']) && empty($element['#processed'])) {
+      foreach ($info['#process'] as $process) {
+        $element = $process($element, $form_state, $context['form']);
+      }
+      $element['#processed'] = TRUE;
     }
   }
 

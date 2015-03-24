@@ -291,6 +291,5 @@ class RequiredByRoleCommonWebTestCase extends RequiredByRoleBasic {
     );
 
     $this->checkFieldRequiredProperty($ids);
-
   }
 }

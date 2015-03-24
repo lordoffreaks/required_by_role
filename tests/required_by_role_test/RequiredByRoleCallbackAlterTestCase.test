@@ -38,7 +38,9 @@ class RequiredByRoleCallbackAlterTestCase extends RequiredByRoleBasic {
    */
   public function testContribModuleCallback() {
 
-    module_enable(array('required_by_role_callback_test'), TRUE);
+    $modules = array('required_by_role_callback_test');
+
+    module_enable($modules);
 
     $result = _required_by_role_get_callback();
     $callback = 'required_by_role_callback_test_required_callback';
@@ -46,8 +48,8 @@ class RequiredByRoleCallbackAlterTestCase extends RequiredByRoleBasic {
 
     $this->assertEqual($result, $callback, $message);
 
-    // Keep it disable to avoid set all fields mandatory.
-    module_disable(array('required_by_role_callback_test'), TRUE);
+    // Disable test modules to avoid set all fields required.
+    module_disable($modules);
 
   }
 }
