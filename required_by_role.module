@@ -96,7 +96,7 @@ function _required_by_role_set_property(&$element, $is_required, $context, $form
 
     // Select element type has some behaviours regarding to the #required
     // property so we must apply the core process function here.
-    if ($element['#type'] == 'select') {
+    if (isset($element['#type']) && $element['#type'] == 'select') {
       $element = form_process_select($element);
     }
   }
